@@ -21,7 +21,7 @@ export const Route = createFileRoute("/produtos/$slug")({
           { property: "og:title", content: loaderData.name },
           {
             property: "og:image",
-            content: loaderData.images[0]?.url ?? "",
+            content: loaderData.images?.[0]?.url ?? "",
           },
         ]
       : [{ title: "Produto · FM IMPORTS" }],
