@@ -77,13 +77,13 @@ export function HeroCarousel({ banners }: { banners: Banner[] | undefined }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
           >
-            <Link
-              to={b.link_url ?? "/produtos"}
+            <a
+              href={b.link_url ?? "/produtos"}
               className="inline-flex items-center gap-2 rounded-full gradient-gold px-6 py-3 text-sm font-semibold text-black shadow-gold transition-transform hover:scale-105"
             >
               {b.cta_label ?? "Explorar"}
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </a>
           </motion.div>
         </div>
       </div>
