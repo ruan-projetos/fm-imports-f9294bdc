@@ -70,6 +70,7 @@ function ProductDetail() {
   const price = hasSale ? product.sale_price! : product.base_price;
 
   function handleAdd() {
+    if (!product) return;
     if (hasColor && !selectedColor) return toast.error("Selecione uma cor");
     if (hasSize && !selectedSize) return toast.error("Selecione um tamanho");
     if (!matchedVariant) return toast.error("Variação indisponível");
