@@ -131,12 +131,9 @@ export const settingsQuery = queryOptions({
   },
 });
 
-function productListQuery(
-  key: string[],
-  build: (
-    q: ReturnType<typeof supabase.from<"products", any>>,
-  ) => any,
-) {
+type ProductListBuilder = (q: any) => any;
+
+function productListQuery(key: string[], build: ProductListBuilder) {
   return queryOptions({
     queryKey: key,
     queryFn: async (): Promise<ProductWithImage[]> => {
@@ -144,7 +141,7 @@ function productListQuery(
         .from("products")
         .select(productSelect)
         .eq("active", true);
-      const { data, error } = await build(base as any);
+      const { data, error } = await build(base);
       if (error) throw error;
       return (data ?? []).map(normalizeProduct);
     },
