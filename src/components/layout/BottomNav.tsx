@@ -22,8 +22,8 @@ export function BottomNav() {
           const active = to === "/" ? path === "/" : path.startsWith(to);
           return (
             <li key={to} className="flex-1">
-              <Link
-                to={to as string}
+              <a
+                href={to}
                 className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors ${
                   active ? "text-foreground" : "text-muted-foreground"
                 }`}
@@ -37,7 +37,7 @@ export function BottomNav() {
                   )}
                 </span>
                 {label}
-              </Link>
+              </a>
             </li>
           );
         })}
