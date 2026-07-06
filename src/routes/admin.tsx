@@ -1,9 +1,8 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdminSession } from "@/hooks/use-admin-role";
-import { useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
