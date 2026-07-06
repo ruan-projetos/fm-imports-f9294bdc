@@ -94,7 +94,7 @@ function ProductsList() {
     onSuccess: (id) => {
       toast.success("Produto duplicado");
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
-      navigate({ to: "/admin/produtos/$id" as any, params: { id } });
+      navigate({ to: "/admin/produtos/$id" as any, params: { id } as any });
     },
     onError: (e: any) => toast.error(e.message),
   });
