@@ -104,7 +104,7 @@ function OrderDetail() {
             <select
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               value={o?.status}
-              onChange={(e) => update.mutate(e.target.value)}
+              onChange={(e) => update.mutate(e.target.value as any)}
             >
               {STATUSES.map((s) => (
                 <option key={s} value={s}>{s}</option>
