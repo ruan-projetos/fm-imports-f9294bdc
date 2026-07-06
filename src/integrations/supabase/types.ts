@@ -105,6 +105,7 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string
+          description: string | null
           id: string
           logo_url: string | null
           name: string
@@ -114,6 +115,7 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string
+          description?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -123,6 +125,7 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
+          description?: string | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -572,6 +575,7 @@ export type Database = {
       }
       reviews: {
         Row: {
+          approved: boolean
           comment: string | null
           created_at: string
           id: string
@@ -580,6 +584,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approved?: boolean
           comment?: string | null
           created_at?: string
           id?: string
@@ -588,6 +593,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approved?: boolean
           comment?: string | null
           created_at?: string
           id?: string
@@ -649,6 +655,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_customers_list: {
+        Args: never
+        Returns: {
+          created_at: string
+          full_name: string
+          last_order: string
+          orders_count: number
+          phone: string
+          spent: number
+          user_id: string
+        }[]
+      }
+      admin_kpis: { Args: never; Returns: Json }
+      admin_sales_by_day: {
+        Args: { days?: number }
+        Returns: {
+          day: string
+          orders_count: number
+          revenue: number
+        }[]
+      }
+      admin_top_categories: {
+        Args: { lim?: number }
+        Returns: {
+          category_id: string
+          name: string
+          revenue: number
+          sold: number
+        }[]
+      }
+      admin_top_products: {
+        Args: { lim?: number }
+        Returns: {
+          image: string
+          name: string
+          product_id: string
+          revenue: number
+          sold: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

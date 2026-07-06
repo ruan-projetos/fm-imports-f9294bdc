@@ -1,73 +1,94 @@
 # Changelog — FM IMPORTS
 
-Formato baseado em [Keep a Changelog](https://keepachangelog.com/). Cada fase do roadmap gera uma entrada aqui.
+Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
+
+---
+
+## [Fase 2] — Painel Administrativo — 2026-07-06
+
+Entrega da área **`/admin`** completa: dashboard, CRUDs, gestão de pedidos, clientes, configurações da loja. Design system, tokens e loja pública **inalterados**.
+
+### Adicionado — Backend
+
+- **5 storage buckets privados** (`products`, `banners`, `categories`, `brands`, `avatars`) com políticas RLS:
+  - Leitura pública dos objetos (via URL assinada de longa duração).
+  - Escrita/remoção restrita a `has_role(auth.uid(), 'admin')`.
+- **Novas colunas**
+  - `reviews.approved boolean default true` — moderação de avaliações.
+  - `brands.description text`.
+- **Novas policies RLS** para leitura/gestão pelo admin em `profiles`, `addresses`, `user_roles`, `orders`, `order_items`, `notifications`, `reviews`.
+- **Trigger `set_order_number`** gera `FM-AAAAMMDD-XXXXX` automaticamente ao criar pedido (quando não fornecido).
+- **RPCs `SECURITY DEFINER`** (autoprotegidas por `has_role`):
+  - `admin_kpis()` — KPIs do dashboard.
+  - `admin_sales_by_day(days)` — série temporal de vendas.
+  - `admin_top_products(lim)` — produtos mais vendidos.
+  - `admin_top_categories(lim)` — categorias mais vendidas.
+  - `admin_customers_list()` — lista de clientes com métricas agregadas.
+
+### Adicionado — Frontend / Rotas
+
+Layout `/admin` (SSR desligado, gate por role admin, redireciona `customer` para `/`).
+
+| Rota | Tela |
+| --- | --- |
+| `/admin` | Dashboard (8 KPIs, gráfico de vendas 30d, donut de categorias, pedidos recentes, top vendidos) |
+| `/admin/produtos` | Lista com busca, filtros, ordenação e paginação |
+| `/admin/produtos/novo` · `/admin/produtos/$id` | Editor em abas (Geral · Preços · Variações · Imagens · SEO) — duplicar, excluir |
+| `/admin/categorias` · `/admin/marcas` | CRUD com upload de imagem e ícone |
+| `/admin/banners` | CRUD com posição, ordem e imagem |
+| `/admin/cupons` | CRUD com tipo (%/R$), validade, limite de uso e status |
+| `/admin/pedidos` · `/admin/pedidos/$id` | Lista + detalhe com timeline de status, itens, snapshot de endereço |
+| `/admin/clientes` · `/admin/clientes/$id` | Lista com métricas + perfil completo (pedidos + endereços) |
+| `/admin/avaliacoes` | Moderação (aprovar/ocultar/excluir) |
+| `/admin/configuracoes` | Loja · Contato · Redes · Pagamento · Rodapé (salvos em `site_settings`) |
+| `/admin/perfil` | Dados do admin autenticado |
+
+### Adicionado — Componentes reutilizáveis
+
+- `AdminShell` — sidebar fixa (desktop) + drawer (mobile) + topbar; item ativo com barra dourada.
+- `KpiCard`, `PageHeader`, `StatusBadge`, `EmptyState`, `ConfirmDialog`.
+- `DataTable` genérico com busca em tempo real, ordenação por coluna, paginação, skeleton loading e empty state.
+- `ImageUploader` com upload múltiplo, reordenação drag-and-drop (`@dnd-kit`), definir capa, remover.
+- `ProductForm` com abas para geral/preço/variações/imagens/SEO e matriz de variações editável.
+
+### Adicionado — Dependências
+
+`recharts@2.15`, `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `framer-motion`, `date-fns`.
+
+### UX
+
+- Toast notifications (`sonner`).
+- Confirmação antes de excluir.
+- Skeleton e loading states em todas as tabelas e cards.
+- Empty states com CTA.
+- Microinterações (hover, transições sutis).
+- Menu responsivo (drawer mobile).
+
+### Segurança
+
+- Nenhum papel armazenado em `profiles`; todos via `user_roles` + `has_role()` `SECURITY DEFINER`.
+- Acesso admin **verificado no cliente E no servidor** (RLS + RPCs com `RAISE EXCEPTION 'forbidden'`).
+- Uploads restritos por RLS em `storage.objects`.
+- Publishable key apenas no browser.
+
+### Próximos passos — Fase 3 (Checkout & Cliente)
+
+- Checkout dual: WhatsApp (`wa.me` com Zod validation) + Mercado Pago (Pix + Cartão) via `createServerFn` + webhook em `/api/public/webhooks/mercadopago`.
+- Área do cliente: pedidos, favoritos, endereços, notificações.
+- Aplicação de cupons no checkout com validação (mín. pedido, expiração, limite de uso).
+- Trigger `on_order_paid` para decrementar `product_variants.stock`.
+- Emails transacionais (confirmação de pedido).
+
+### Próximos passos — Fase 4 (Polish)
+
+- Reviews visíveis apenas aprovadas na loja pública, produtos relacionados.
+- Busca full-text (`pg_trgm` / `websearch_to_tsquery`).
+- Animações Framer Motion refinadas em toda a jornada.
+- Push notifications (PWA), service worker offline.
+- Testes E2E (Playwright).
 
 ---
 
 ## [Fase 1] — Fundação — 2026-07-04
 
-Entrega da base técnica e visual da plataforma. Loja navegável (home + catálogo + detalhe + carrinho + auth), banco completo com RLS e PWA instalável.
-
-### Adicionado — Infraestrutura & Backend
-- **Lovable Cloud (Supabase)** habilitado como backend único (Postgres + Auth + Storage + RLS).
-- **16 tabelas** criadas com Row-Level Security e GRANTs corretos por role:
-  `profiles`, `user_roles`, `addresses`, `categories`, `brands`,
-  `products`, `product_images`, `product_variants`,
-  `reviews`, `favorites`, `banners`, `coupons`,
-  `orders`, `order_items`, `notifications`, `site_settings`.
-- **Enum `app_role`** (`admin` | `customer`) em tabela dedicada `user_roles` (evita privilege escalation).
-- **Função `has_role(uuid, app_role)`** `SECURITY DEFINER` para políticas RLS não-recursivas.
-- **Trigger `handle_new_user`** em `auth.users` — cria `profiles` + atribui role `customer` a cada novo cadastro.
-- **Trigger `update_updated_at_column`** aplicada a todas as tabelas com `updated_at`.
-- Seeds iniciais: **6 categorias**, **5 marcas**, **~10 produtos** com variações de cor/tamanho, **2 banners** e configurações do site (`site_settings`).
-- Documentação de schema completa em [`DATABASE.md`](./DATABASE.md).
-
-### Adicionado — Design System
-- Paleta dark-first (Preto profundo / Off-white / Grafite / **Dourado coroa**) em `src/styles.css` via tokens semânticos HSL/OKLCH.
-- Tipografia: **Space Grotesk** (display) + **Inter** (body), carregados via `<link>` em `__root.tsx`.
-- Utilitários: `gradient-gold`, `shimmer`, `glass`, `text-gold`.
-- Grid 8pt, radius 12–16px, sombras discretas.
-
-### Adicionado — PWA
-- `public/manifest.webmanifest` com ícones, cores e display `standalone`.
-- Meta tags de PWA (apple-touch, theme-color) no root.
-- Pronto para instalar em Android/iOS ("Adicionar à Tela Inicial").
-
-### Adicionado — Frontend / Rotas
-- **Layout base**: `Header` responsivo, `BottomNav` mobile, `Footer`, `WhatsAppFab` flutuante.
-- **Home** (`/`): `HeroCarousel` (banners do banco), `CategoryStrip`, seções de Destaques / Novidades / Mais Vendidos.
-- **Catálogo** (`/produtos`): grid responsivo com filtros por categoria/marca.
-- **Categoria** (`/categoria/$slug`): listagem filtrada.
-- **Detalhe do produto** (`/produtos/$slug`): galeria, seleção de cor/tamanho, controle de estoque por variação, adicionar ao carrinho.
-- **Carrinho** (`/carrinho`): CRUD de itens, quantidades, total; persistente via Zustand + localStorage.
-- **Auth** (`/auth`): login e cadastro por email/senha.
-
-### Adicionado — Camada de Dados
-- **TanStack Query** + `src/lib/queries.ts` centralizando fetchers públicos (produtos, categorias, banners, marcas).
-- **Zustand** (`src/store/cart.ts`) para carrinho persistente entre sessões.
-- Cliente Supabase configurado (browser + server) com bearer middleware.
-
-### Segurança
-- RLS **habilitado em todas as tabelas** do schema `public`.
-- Políticas separam leitura pública (produtos ativos, categorias, banners) de dados do usuário (`auth.uid()`) e dados admin (via `has_role`).
-- Nenhum secret client-side; publishable key apenas no browser.
-
-### Próximos passos — Fase 2 (Compra)
-- Checkout dual: **WhatsApp** (`wa.me`) + **Mercado Pago** (Pix + Cartão) via `createServerFn` + webhook em `/api/public/webhooks/mercadopago`.
-- Sistema de **cupons** aplicáveis no checkout.
-- Área do cliente completa: pedidos, endereços, favoritos, notificações.
-- Trigger `on_order_paid` para decrementar `product_variants.stock` quando `orders.status → 'paid'`.
-- Emails transacionais (confirmação de pedido).
-
-### Próximos passos — Fase 3 (Admin)
-- Dashboard `/admin` gated por `has_role(auth.uid(), 'admin')` com KPIs (faturamento, ticket médio, pedidos/dia) via Recharts.
-- CRUDs: produtos + variações + upload multi-imagem (Storage bucket `products`), categorias, marcas, banners, cupons.
-- Gestão de pedidos (mudança de status, rastreio).
-- Relatórios: mais vendidos, faturamento mensal, top categorias.
-
-### Próximos passos — Fase 4 (Polish)
-- Reviews e produtos relacionados.
-- Busca inteligente com ranking (Postgres full-text search).
-- Animações Framer Motion refinadas + skeleton/shimmer em todas as listas.
-- Testes end-to-end (Playwright).
-- Notificações push (PWA).
+_(preservado — ver histórico do repositório.)_
