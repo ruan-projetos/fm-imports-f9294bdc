@@ -33,7 +33,7 @@ function EditProduct() {
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data as any;
+      return data as unknown as ProductWithRelations;
     },
   });
 
