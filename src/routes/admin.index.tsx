@@ -248,7 +248,7 @@ function Dashboard() {
                   <div className="min-w-0">
                     <p className="truncate font-medium">{o.order_number}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {(o.customer_snapshot as any)?.name ?? "Cliente"}
+                      {((o.customer_snapshot ?? {}) as CustomerSnapshot).name ?? "Cliente"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
