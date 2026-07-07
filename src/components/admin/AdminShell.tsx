@@ -76,7 +76,7 @@ function SidebarBody({ onNavigate, email }: { onNavigate?: () => void; email?: s
           return (
             <Link
               key={item.to}
-              to={item.to as any}
+              to={item.to}
               onClick={onNavigate}
               className={cn(
                 "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
