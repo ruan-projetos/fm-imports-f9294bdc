@@ -60,7 +60,7 @@ function NewProduct() {
     },
     onSuccess: (id) => {
       toast.success("Produto criado");
-      navigate({ to: "/admin/produtos/$id", params: { id } as any });
+      navigate({ to: "/admin/produtos/$id", params: { id } });
     },
     onError: (e: any) => toast.error(e.message),
   });

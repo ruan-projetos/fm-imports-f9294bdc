@@ -51,7 +51,7 @@ function CustomersList() {
           columns={cols}
           rowKey={(r) => r.user_id}
           searchAccessor={(r) => `${r.full_name ?? ""} ${r.phone ?? ""}`}
-          onRowClick={(r) => navigate({ to: "/admin/clientes/$id", params: { id: r.user_id } as any })}
+          onRowClick={(r) => navigate({ to: "/admin/clientes/$id", params: { id: r.user_id } })}
         />
       )}
     </div>
