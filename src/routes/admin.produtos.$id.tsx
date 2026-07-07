@@ -4,10 +4,17 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { ProductForm, type ProductFormValues, blankValues } from "@/components/admin/ProductForm";
 import { Button } from "@/components/ui/button";
 import { slugify } from "@/lib/slug";
+
+type ProductWithRelations = Tables<"products"> & {
+  product_images: Tables<"product_images">[];
+  product_variants: Tables<"product_variants">[];
+};
+
 
 export const Route = createFileRoute("/admin/produtos/$id")({ component: EditProduct });
 
