@@ -69,7 +69,16 @@ function ProductsList() {
         .eq("id", id)
         .single();
       if (error) throw error;
-      const { product_variants, id: _id, created_at, updated_at, slug, name, ...rest } = src as any;
+      if (!src) throw new Error("Produto não encontrado");
+      const {
+        product_variants,
+        id: _id,
+        created_at: _c,
+        updated_at: _u,
+        slug,
+        name,
+        ...rest
+      } = src as typeof src & { product_variants: Tables<"product_variants">[] };
       const newName = `${name} (cópia)`;
       const newSlug = `${slug}-copia-${Date.now().toString(36)}`;
       const { data: created, error: cErr } = await supabase
@@ -79,7 +88,7 @@ function ProductsList() {
         .single();
       if (cErr) throw cErr;
       if (product_variants?.length) {
-        const rows = product_variants.map((v: any) => ({
+        const rows = product_variants.map((v) => ({
           product_id: created.id,
           color: v.color,
           color_hex: v.color_hex,
