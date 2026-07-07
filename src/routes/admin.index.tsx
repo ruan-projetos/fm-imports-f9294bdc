@@ -243,7 +243,7 @@ function Dashboard() {
             <p className="text-sm text-muted-foreground">Nenhum pedido registrado.</p>
           ) : (
             <ul className="divide-y divide-border/40">
-              {recentOrders.data!.map((o: any) => (
+              {recentOrders.data!.map((o) => (
                 <li key={o.id} className="flex items-center justify-between py-2.5 text-sm">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{o.order_number}</p>
@@ -269,7 +269,7 @@ function Dashboard() {
             <p className="text-sm text-muted-foreground">Nenhuma venda ainda.</p>
           ) : (
             <ul className="divide-y divide-border/40">
-              {topProducts.data!.map((p: any) => (
+              {topProducts.data!.map((p) => (
                 <li key={p.product_id} className="flex items-center gap-3 py-2.5">
                   <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
                     {p.image && <img src={p.image} alt="" className="h-full w-full object-cover" />}
