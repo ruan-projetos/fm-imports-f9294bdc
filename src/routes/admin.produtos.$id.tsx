@@ -53,9 +53,9 @@ function EditProduct() {
         is_bestseller: q.data.is_bestseller,
         active: q.data.active,
         images: (q.data.product_images ?? [])
-          .sort((a: any, b: any) => a.sort_order - b.sort_order)
-          .map((i: any) => ({ id: i.id, url: i.url })),
-        variants: (q.data.product_variants ?? []).map((v: any) => ({
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((i) => ({ id: i.id, url: i.url })),
+        variants: (q.data.product_variants ?? []).map((v) => ({
           id: v.id,
           color: v.color ?? "",
           color_hex: v.color_hex ?? "",
@@ -90,7 +90,7 @@ function EditProduct() {
       if (error) throw error;
 
       // Sync images: delete missing, insert new, upsert sort_order
-      const existingImgIds = new Set((q.data?.product_images ?? []).map((i: any) => i.id));
+      const existingImgIds = new Set((q.data?.product_images ?? []).map((i) => i.id));
       const keptIds = new Set(v.images.filter((i) => i.id).map((i) => i.id!));
       const toDelete = [...existingImgIds].filter((eid) => !keptIds.has(eid as string));
       if (toDelete.length) {
@@ -106,7 +106,7 @@ function EditProduct() {
       }
 
       // Sync variants
-      const existingVarIds = new Set((q.data?.product_variants ?? []).map((v: any) => v.id));
+      const existingVarIds = new Set((q.data?.product_variants ?? []).map((v) => v.id));
       const keptVarIds = new Set(v.variants.filter((v) => v.id).map((v) => v.id!));
       const toDelVars = [...existingVarIds].filter((vid) => !keptVarIds.has(vid as string));
       if (toDelVars.length) {
