@@ -4,6 +4,31 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [Fase 2 — Hotfix] — Tipagem e correções — 2026-07-07
+
+### Corrigido
+
+- **`admin.pedidos.$id.tsx`** — `status` do pedido agora tipado como `Enums<"order_status">` (removido `as any`).
+- **`StatusBadge`** — labels/estilos usam os valores reais do enum: `cancelled` (não `canceled`), `processing`, `refunded`.
+- **RPC `admin_top_products` / `admin_top_categories`** — referenciavam a coluna inexistente `order_items.subtotal`. Agora somam `quantity * unit_price`.
+- **`admin.pedidos.$id.tsx`** — display do subtotal do item calcula `unit_price * quantity` (a tabela `order_items` não tem coluna `subtotal`).
+- Remoção sistemática de `as any` em rotas do admin:
+  - Navegação (`to: "/admin/..."`, `params: { id }`) — passa agora pelo tipo gerado do route tree.
+  - `useMutation.onError` tipado como `(e: Error)`.
+  - Snapshots (`customer_snapshot`, `address_snapshot`, `product_snapshot`) tipados via interfaces locais.
+  - Retornos das RPCs (`admin_kpis`, `admin_sales_by_day`, `admin_top_products`, `admin_top_categories`) usam os tipos gerados em `types.ts`.
+  - Produto (`/admin/produtos/$id`) tipado como `Tables<"products"> & { product_images, product_variants }`.
+- **`AdminShell`** — `NavItem.to` restrito a união literal das rotas registradas.
+
+### Estado do build
+
+- `tsgo --noEmit` → **0 erros / 0 warnings**.
+- `as any` remanescente: apenas no arquivo gerado `src/routeTree.gen.ts` (não editável).
+
+---
+
+
+
 ## [Fase 2] — Painel Administrativo — 2026-07-06
 
 Entrega da área **`/admin`** completa: dashboard, CRUDs, gestão de pedidos, clientes, configurações da loja. Design system, tokens e loja pública **inalterados**.
