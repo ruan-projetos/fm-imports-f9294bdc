@@ -110,7 +110,7 @@ function OrderDetail() {
                       {snap.color ?? ""} {snap.size ? `· ${snap.size}` : ""} · Qtd {it.quantity}
                     </p>
                   </div>
-                  <span className="font-semibold">{formatBRL(Number(it.subtotal))}</span>
+                  <span className="font-semibold">{formatBRL(Number(it.unit_price) * it.quantity)}</span>
                 </li>
               );
             })}
