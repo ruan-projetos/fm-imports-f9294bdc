@@ -22,7 +22,20 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
-type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+type NavRoute =
+  | "/admin"
+  | "/admin/produtos"
+  | "/admin/categorias"
+  | "/admin/marcas"
+  | "/admin/pedidos"
+  | "/admin/clientes"
+  | "/admin/banners"
+  | "/admin/cupons"
+  | "/admin/avaliacoes"
+  | "/admin/configuracoes"
+  | "/admin/perfil";
+
+type NavItem = { to: NavRoute; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 const NAV: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
