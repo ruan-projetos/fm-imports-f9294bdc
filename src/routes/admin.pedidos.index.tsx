@@ -56,7 +56,7 @@ function OrdersList() {
           columns={cols}
           rowKey={(r) => r.id}
           searchAccessor={(r) => `${r.order_number} ${(r.customer_snapshot as any)?.name ?? ""}`}
-          onRowClick={(r) => navigate({ to: "/admin/pedidos/$id" as any, params: { id: r.id } as any })}
+          onRowClick={(r) => navigate({ to: "/admin/pedidos/$id", params: { id: r.id } as any })}
         />
       )}
     </div>

@@ -151,7 +151,7 @@ function EditProduct() {
         title={q.data?.name ?? "Editar produto"}
         description="Atualize dados, variações, imagens e SEO."
         actions={
-          <Button variant="outline" onClick={() => navigate({ to: "/admin/produtos" as any })}>
+          <Button variant="outline" onClick={() => navigate({ to: "/admin/produtos" })}>
             Voltar
           </Button>
         }

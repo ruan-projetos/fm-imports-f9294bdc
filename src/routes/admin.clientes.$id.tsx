@@ -51,7 +51,7 @@ function CustomerDetail() {
         title={profile.data?.full_name ?? "Cliente"}
         description={profile.data?.phone ?? ""}
         actions={
-          <Button variant="outline" onClick={() => navigate({ to: "/admin/clientes" as any })}>
+          <Button variant="outline" onClick={() => navigate({ to: "/admin/clientes" })}>
             <ArrowLeft className="mr-1.5 h-4 w-4" /> Voltar
           </Button>
         }

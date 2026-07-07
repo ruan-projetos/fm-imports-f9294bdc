@@ -94,7 +94,7 @@ function ProductsList() {
     onSuccess: (id) => {
       toast.success("Produto duplicado");
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
-      navigate({ to: "/admin/produtos/$id" as any, params: { id } as any });
+      navigate({ to: "/admin/produtos/$id", params: { id } as any });
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -167,8 +167,8 @@ function ProductsList() {
       render: (r) => (
         <div className="flex justify-end gap-1">
           <Link
-            to={"/admin/produtos/$id" as any}
-            params={{ id: r.id } as any}
+            to={"/admin/produtos/$id" }
+            params={{ id: r.id } }
             className="rounded-md p-1.5 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             aria-label="Editar"
             onClick={(e) => e.stopPropagation()}
@@ -207,7 +207,7 @@ function ProductsList() {
         description="Gerencie o catálogo completo — imagens, variações e estoque."
         actions={
           <Button asChild className="gradient-gold text-black hover:opacity-90">
-            <Link to={"/admin/produtos/novo" as any}>
+            <Link to={"/admin/produtos/novo" }>
               <Plus className="mr-1.5 h-4 w-4" />
               Novo produto
             </Link>
@@ -222,7 +222,7 @@ function ProductsList() {
           description="Comece cadastrando seu primeiro produto para deixá-lo disponível na loja."
           action={
             <Button asChild className="gradient-gold text-black">
-              <Link to={"/admin/produtos/novo" as any}>
+              <Link to={"/admin/produtos/novo" }>
                 <Plus className="mr-1.5 h-4 w-4" />
                 Novo produto
               </Link>
@@ -237,7 +237,7 @@ function ProductsList() {
           searchAccessor={(r) => `${r.name} ${r.slug} ${r.categories?.name ?? ""} ${r.brands?.name ?? ""}`}
           searchPlaceholder="Pesquisar produtos…"
           rowKey={(r) => r.id}
-          onRowClick={(r) => navigate({ to: "/admin/produtos/$id" as any, params: { id: r.id } as any })}
+          onRowClick={(r) => navigate({ to: "/admin/produtos/$id", params: { id: r.id } as any })}
         />
       )}
 
