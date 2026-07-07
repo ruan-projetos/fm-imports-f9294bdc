@@ -35,13 +35,26 @@ export const Route = createFileRoute("/admin/")({ component: Dashboard });
 const GOLD = "#e5b74a";
 const PIE_COLORS = ["#e5b74a", "#8b7ec8", "#6dc7c1", "#e88b6d", "#a3a3a3", "#66b26e"];
 
+type KpiPayload = {
+  revenue_total?: number;
+  revenue_month?: number;
+  orders_total?: number;
+  orders_pending?: number;
+  customers_total?: number;
+  products_total?: number;
+  low_stock?: number;
+  out_of_stock?: number;
+};
+
+type CustomerSnapshot = { name?: string };
+
 function Dashboard() {
   const kpis = useQuery({
     queryKey: ["admin", "kpis"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_kpis");
       if (error) throw error;
-      return data as any;
+      return (data ?? {}) as KpiPayload;
     },
   });
 
@@ -50,7 +63,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_sales_by_day", { days: 30 });
       if (error) throw error;
-      return (data as any[]) ?? [];
+      return data ?? [];
     },
   });
 
@@ -59,7 +72,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_top_products", { lim: 5 });
       if (error) throw error;
-      return (data as any[]) ?? [];
+      return data ?? [];
     },
   });
 
@@ -68,7 +81,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_top_categories", { lim: 6 });
       if (error) throw error;
-      return (data as any[]) ?? [];
+      return data ?? [];
     },
   });
 
