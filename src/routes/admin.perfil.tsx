@@ -45,7 +45,7 @@ function ProfilePage() {
       toast.success("Perfil atualizado");
       qc.invalidateQueries({ queryKey: ["admin", "my-profile"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (s.status !== "admin") return null;

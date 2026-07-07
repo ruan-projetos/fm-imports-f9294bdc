@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Copy, Trash2, Pencil, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -58,7 +59,7 @@ function ProductsList() {
       toast.success("Produto removido");
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const duplicate = useMutation({
@@ -69,7 +70,16 @@ function ProductsList() {
         .eq("id", id)
         .single();
       if (error) throw error;
-      const { product_variants, id: _id, created_at, updated_at, slug, name, ...rest } = src as any;
+      if (!src) throw new Error("Produto não encontrado");
+      const {
+        product_variants,
+        id: _id,
+        created_at: _c,
+        updated_at: _u,
+        slug,
+        name,
+        ...rest
+      } = src as typeof src & { product_variants: Tables<"product_variants">[] };
       const newName = `${name} (cópia)`;
       const newSlug = `${slug}-copia-${Date.now().toString(36)}`;
       const { data: created, error: cErr } = await supabase
@@ -79,7 +89,7 @@ function ProductsList() {
         .single();
       if (cErr) throw cErr;
       if (product_variants?.length) {
-        const rows = product_variants.map((v: any) => ({
+        const rows = product_variants.map((v) => ({
           product_id: created.id,
           color: v.color,
           color_hex: v.color_hex,
@@ -94,9 +104,9 @@ function ProductsList() {
     onSuccess: (id) => {
       toast.success("Produto duplicado");
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
-      navigate({ to: "/admin/produtos/$id" as any, params: { id } as any });
+      navigate({ to: "/admin/produtos/$id", params: { id } });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const columns: Column<Row>[] = [
@@ -167,8 +177,8 @@ function ProductsList() {
       render: (r) => (
         <div className="flex justify-end gap-1">
           <Link
-            to={"/admin/produtos/$id" as any}
-            params={{ id: r.id } as any}
+            to={"/admin/produtos/$id" }
+            params={{ id: r.id } }
             className="rounded-md p-1.5 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             aria-label="Editar"
             onClick={(e) => e.stopPropagation()}
@@ -207,7 +217,7 @@ function ProductsList() {
         description="Gerencie o catálogo completo — imagens, variações e estoque."
         actions={
           <Button asChild className="gradient-gold text-black hover:opacity-90">
-            <Link to={"/admin/produtos/novo" as any}>
+            <Link to={"/admin/produtos/novo" }>
               <Plus className="mr-1.5 h-4 w-4" />
               Novo produto
             </Link>
@@ -222,7 +232,7 @@ function ProductsList() {
           description="Comece cadastrando seu primeiro produto para deixá-lo disponível na loja."
           action={
             <Button asChild className="gradient-gold text-black">
-              <Link to={"/admin/produtos/novo" as any}>
+              <Link to={"/admin/produtos/novo" }>
                 <Plus className="mr-1.5 h-4 w-4" />
                 Novo produto
               </Link>
@@ -237,7 +247,7 @@ function ProductsList() {
           searchAccessor={(r) => `${r.name} ${r.slug} ${r.categories?.name ?? ""} ${r.brands?.name ?? ""}`}
           searchPlaceholder="Pesquisar produtos…"
           rowKey={(r) => r.id}
-          onRowClick={(r) => navigate({ to: "/admin/produtos/$id" as any, params: { id: r.id } as any })}
+          onRowClick={(r) => navigate({ to: "/admin/produtos/$id", params: { id: r.id } })}
         />
       )}
 

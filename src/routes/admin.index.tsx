@@ -35,13 +35,26 @@ export const Route = createFileRoute("/admin/")({ component: Dashboard });
 const GOLD = "#e5b74a";
 const PIE_COLORS = ["#e5b74a", "#8b7ec8", "#6dc7c1", "#e88b6d", "#a3a3a3", "#66b26e"];
 
+type KpiPayload = {
+  revenue_total?: number;
+  revenue_month?: number;
+  orders_total?: number;
+  orders_pending?: number;
+  customers_total?: number;
+  products_total?: number;
+  low_stock?: number;
+  out_of_stock?: number;
+};
+
+type CustomerSnapshot = { name?: string };
+
 function Dashboard() {
   const kpis = useQuery({
     queryKey: ["admin", "kpis"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_kpis");
       if (error) throw error;
-      return data as any;
+      return (data ?? {}) as KpiPayload;
     },
   });
 
@@ -50,7 +63,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_sales_by_day", { days: 30 });
       if (error) throw error;
-      return (data as any[]) ?? [];
+      return data ?? [];
     },
   });
 
@@ -59,7 +72,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_top_products", { lim: 5 });
       if (error) throw error;
-      return (data as any[]) ?? [];
+      return data ?? [];
     },
   });
 
@@ -68,7 +81,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_top_categories", { lim: 6 });
       if (error) throw error;
-      return (data as any[]) ?? [];
+      return data ?? [];
     },
   });
 
@@ -201,7 +214,7 @@ function Dashboard() {
                     outerRadius={75}
                     paddingAngle={3}
                   >
-                    {(topCategories.data ?? []).map((_: any, i: number) => (
+                    {(topCategories.data ?? []).map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
@@ -230,12 +243,12 @@ function Dashboard() {
             <p className="text-sm text-muted-foreground">Nenhum pedido registrado.</p>
           ) : (
             <ul className="divide-y divide-border/40">
-              {recentOrders.data!.map((o: any) => (
+              {recentOrders.data!.map((o) => (
                 <li key={o.id} className="flex items-center justify-between py-2.5 text-sm">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{o.order_number}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {(o.customer_snapshot as any)?.name ?? "Cliente"}
+                      {((o.customer_snapshot ?? {}) as CustomerSnapshot).name ?? "Cliente"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -256,7 +269,7 @@ function Dashboard() {
             <p className="text-sm text-muted-foreground">Nenhuma venda ainda.</p>
           ) : (
             <ul className="divide-y divide-border/40">
-              {topProducts.data!.map((p: any) => (
+              {topProducts.data!.map((p) => (
                 <li key={p.product_id} className="flex items-center gap-3 py-2.5">
                   <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
                     {p.image && <img src={p.image} alt="" className="h-full w-full object-cover" />}

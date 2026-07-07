@@ -10,6 +10,8 @@ import { formatBRL } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/pedidos/")({ component: OrdersList });
 
+type CustomerSnapshot = { name?: string; email?: string; phone?: string };
+
 type Order = {
   id: string;
   order_number: string;
@@ -18,7 +20,7 @@ type Order = {
   payment_method: string | null;
   total: number;
   created_at: string;
-  customer_snapshot: any;
+  customer_snapshot: CustomerSnapshot | null;
 };
 
 function OrdersList() {
@@ -31,13 +33,13 @@ function OrdersList() {
         .select("id,order_number,status,payment_status,payment_method,total,created_at,customer_snapshot")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as Order[];
+      return (data ?? []) as unknown as Order[];
     },
   });
 
   const cols: Column<Order>[] = [
     { key: "num", header: "Número", sortAccessor: (r) => r.order_number, render: (r) => <span className="font-mono text-sm font-semibold">{r.order_number}</span> },
-    { key: "cust", header: "Cliente", render: (r) => (r.customer_snapshot as any)?.name ?? "—" },
+    { key: "cust", header: "Cliente", render: (r) => r.customer_snapshot?.name ?? "—" },
     { key: "pay", header: "Pagamento", render: (r) => <span className="text-xs">{r.payment_method ?? "—"}</span> },
     { key: "st", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
     { key: "date", header: "Data", sortAccessor: (r) => r.created_at, render: (r) => new Date(r.created_at).toLocaleDateString("pt-BR") },
@@ -55,8 +57,8 @@ function OrdersList() {
           loading={q.isLoading}
           columns={cols}
           rowKey={(r) => r.id}
-          searchAccessor={(r) => `${r.order_number} ${(r.customer_snapshot as any)?.name ?? ""}`}
-          onRowClick={(r) => navigate({ to: "/admin/pedidos/$id" as any, params: { id: r.id } as any })}
+          searchAccessor={(r) => `${r.order_number} ${r.customer_snapshot?.name ?? ""}`}
+          onRowClick={(r) => navigate({ to: "/admin/pedidos/$id", params: { id: r.id } })}
         />
       )}
     </div>

@@ -53,7 +53,7 @@ function SettingsPage() {
       qc.invalidateQueries({ queryKey: ["admin", "settings"] });
       qc.invalidateQueries({ queryKey: ["site_settings"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const set = (group: string, field: string, val: string) =>

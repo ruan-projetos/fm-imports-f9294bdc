@@ -51,7 +51,7 @@ function CustomerDetail() {
         title={profile.data?.full_name ?? "Cliente"}
         description={profile.data?.phone ?? ""}
         actions={
-          <Button variant="outline" onClick={() => navigate({ to: "/admin/clientes" as any })}>
+          <Button variant="outline" onClick={() => navigate({ to: "/admin/clientes" })}>
             <ArrowLeft className="mr-1.5 h-4 w-4" /> Voltar
           </Button>
         }
@@ -64,7 +64,7 @@ function CustomerDetail() {
             <p className="text-sm text-muted-foreground">Sem pedidos.</p>
           ) : (
             <ul className="divide-y divide-border/40">
-              {orders.data!.map((o: any) => (
+              {orders.data!.map((o) => (
                 <li key={o.id} className="flex items-center justify-between py-2.5 text-sm">
                   <div>
                     <p className="font-medium">{o.order_number}</p>
@@ -86,7 +86,7 @@ function CustomerDetail() {
             <p className="text-sm text-muted-foreground">Nenhum endereço.</p>
           ) : (
             <ul className="space-y-3 text-sm">
-              {addresses.data!.map((a: any) => (
+              {addresses.data!.map((a) => (
                 <li key={a.id} className="rounded-lg border border-border/40 bg-background/40 p-3">
                   <p className="font-medium">{a.label ?? "Endereço"}</p>
                   <p className="text-muted-foreground">{a.street}, {a.number} — {a.city}/{a.state}</p>

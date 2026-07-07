@@ -15,7 +15,7 @@ function AdminLayout() {
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
-      navigate({ to: "/auth", search: { redirect: "/admin" } as any });
+      navigate({ to: "/auth", search: { redirect: "/admin" } });
     } else if (session.status === "forbidden") {
       navigate({ to: "/" });
     }

@@ -2,7 +2,7 @@
 
 Plataforma de e-commerce completa para a **FM IMPORTS**, construída como Progressive Web App com aparência de aplicativo nativo. Curadoria de moda, calçados, acessórios e perfumaria importados.
 
-> **Status:** Fase 1 (Fundação) concluída. Ver [`CHANGELOG.md`](./CHANGELOG.md) para detalhes.
+> **Status:** Fase 1 (Fundação) e Fase 2 (Painel Administrativo) concluídas — build limpa em TypeScript strict. Ver [`CHANGELOG.md`](./CHANGELOG.md).
 
 ---
 

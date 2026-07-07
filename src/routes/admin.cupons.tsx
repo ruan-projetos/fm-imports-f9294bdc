@@ -71,7 +71,7 @@ function CouponsPage() {
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
@@ -159,7 +159,7 @@ function CouponsPage() {
                   <select
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={editing.discount_type ?? "percent"}
-                    onChange={(e) => setEditing({ ...editing, discount_type: e.target.value as any })}
+                    onChange={(e) => setEditing({ ...editing, discount_type: e.target.value as "percent" | "fixed" })}
                   >
                     <option value="percent">Porcentagem (%)</option>
                     <option value="fixed">Valor fixo (R$)</option>

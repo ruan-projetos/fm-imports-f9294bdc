@@ -4,10 +4,17 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { ProductForm, type ProductFormValues, blankValues } from "@/components/admin/ProductForm";
 import { Button } from "@/components/ui/button";
 import { slugify } from "@/lib/slug";
+
+type ProductWithRelations = Tables<"products"> & {
+  product_images: Tables<"product_images">[];
+  product_variants: Tables<"product_variants">[];
+};
+
 
 export const Route = createFileRoute("/admin/produtos/$id")({ component: EditProduct });
 
@@ -26,7 +33,7 @@ function EditProduct() {
         .eq("id", id)
         .single();
       if (error) throw error;
-      return data as any;
+      return data as unknown as ProductWithRelations;
     },
   });
 
@@ -46,9 +53,9 @@ function EditProduct() {
         is_bestseller: q.data.is_bestseller,
         active: q.data.active,
         images: (q.data.product_images ?? [])
-          .sort((a: any, b: any) => a.sort_order - b.sort_order)
-          .map((i: any) => ({ id: i.id, url: i.url })),
-        variants: (q.data.product_variants ?? []).map((v: any) => ({
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((i) => ({ id: i.id, url: i.url })),
+        variants: (q.data.product_variants ?? []).map((v) => ({
           id: v.id,
           color: v.color ?? "",
           color_hex: v.color_hex ?? "",
@@ -83,7 +90,7 @@ function EditProduct() {
       if (error) throw error;
 
       // Sync images: delete missing, insert new, upsert sort_order
-      const existingImgIds = new Set((q.data?.product_images ?? []).map((i: any) => i.id));
+      const existingImgIds = new Set((q.data?.product_images ?? []).map((i) => i.id));
       const keptIds = new Set(v.images.filter((i) => i.id).map((i) => i.id!));
       const toDelete = [...existingImgIds].filter((eid) => !keptIds.has(eid as string));
       if (toDelete.length) {
@@ -99,7 +106,7 @@ function EditProduct() {
       }
 
       // Sync variants
-      const existingVarIds = new Set((q.data?.product_variants ?? []).map((v: any) => v.id));
+      const existingVarIds = new Set((q.data?.product_variants ?? []).map((v) => v.id));
       const keptVarIds = new Set(v.variants.filter((v) => v.id).map((v) => v.id!));
       const toDelVars = [...existingVarIds].filter((vid) => !keptVarIds.has(vid as string));
       if (toDelVars.length) {
@@ -134,7 +141,7 @@ function EditProduct() {
       qc.invalidateQueries({ queryKey: ["admin", "product", id] });
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (q.isLoading) {
@@ -151,7 +158,7 @@ function EditProduct() {
         title={q.data?.name ?? "Editar produto"}
         description="Atualize dados, variações, imagens e SEO."
         actions={
-          <Button variant="outline" onClick={() => navigate({ to: "/admin/produtos" as any })}>
+          <Button variant="outline" onClick={() => navigate({ to: "/admin/produtos" })}>
             Voltar
           </Button>
         }
