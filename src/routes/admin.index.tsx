@@ -214,7 +214,7 @@ function Dashboard() {
                     outerRadius={75}
                     paddingAngle={3}
                   >
-                    {(topCategories.data ?? []).map((_: any, i: number) => (
+                    {(topCategories.data ?? []).map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
