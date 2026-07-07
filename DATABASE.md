@@ -352,3 +352,22 @@ Todas versionadas em `supabase/migrations/`. Cada migration segue a ordem obriga
 4. `CREATE POLICY ...`
 
 Nunca modificar schemas gerenciados (`auth`, `storage`, `realtime`, `supabase_functions`, `vault`).
+
+---
+
+## Atualização 2026-07-07 (Fase 2 — Hotfix)
+
+### RPC corrigido
+
+`admin_top_products(lim)` e `admin_top_categories(lim)` foram reescritos:
+
+- **Antes:** somavam `oi.subtotal` — coluna que **não existe** em `order_items`.
+- **Depois:** `SUM(oi.quantity * oi.unit_price)`.
+
+`order_items` armazena apenas `quantity` e `unit_price`; o subtotal é sempre derivado.
+
+### Enum `order_status` — valores oficiais
+
+`'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'`
+
+Atenção: **`cancelled`** com dois L (grafia britânica), alinhada ao enum do banco. Componente `StatusBadge` foi atualizado para refletir esta grafia.
