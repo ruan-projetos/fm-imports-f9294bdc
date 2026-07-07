@@ -32,7 +32,7 @@ function OrderDetail() {
 
   const update = useMutation({
     mutationFn: async (status: string) => {
-      const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+      const { error } = await supabase.from("orders").update({ status: status as any }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
