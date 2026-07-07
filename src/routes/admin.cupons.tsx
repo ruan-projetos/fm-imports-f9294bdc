@@ -71,7 +71,7 @@ function CouponsPage() {
       setEditing(null);
       qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({

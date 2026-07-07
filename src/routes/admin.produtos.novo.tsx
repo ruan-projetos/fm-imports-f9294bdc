@@ -62,7 +62,7 @@ function NewProduct() {
       toast.success("Produto criado");
       navigate({ to: "/admin/produtos/$id", params: { id } });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (

@@ -76,7 +76,7 @@ function CategoriesPage() {
       qc.invalidateQueries({ queryKey: ["admin", "categories"] });
       qc.invalidateQueries({ queryKey: ["categories"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
@@ -88,7 +88,7 @@ function CategoriesPage() {
       toast.success("Categoria removida");
       qc.invalidateQueries({ queryKey: ["admin", "categories"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const columns: Column<Cat>[] = [

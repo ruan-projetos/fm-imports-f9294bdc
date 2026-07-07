@@ -68,7 +68,7 @@ function BrandsPage() {
       qc.invalidateQueries({ queryKey: ["admin", "brands"] });
       qc.invalidateQueries({ queryKey: ["brands"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
@@ -80,7 +80,7 @@ function BrandsPage() {
       toast.success("Marca removida");
       qc.invalidateQueries({ queryKey: ["admin", "brands"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const columns: Column<Brand>[] = [

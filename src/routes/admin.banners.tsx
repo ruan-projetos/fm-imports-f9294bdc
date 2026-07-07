@@ -70,7 +70,7 @@ function BannersPage() {
       qc.invalidateQueries({ queryKey: ["admin", "banners"] });
       qc.invalidateQueries({ queryKey: ["banners", "hero"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({

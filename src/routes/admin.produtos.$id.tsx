@@ -134,7 +134,7 @@ function EditProduct() {
       qc.invalidateQueries({ queryKey: ["admin", "product", id] });
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (q.isLoading) {

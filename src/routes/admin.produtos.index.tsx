@@ -58,7 +58,7 @@ function ProductsList() {
       toast.success("Produto removido");
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const duplicate = useMutation({
@@ -96,7 +96,7 @@ function ProductsList() {
       qc.invalidateQueries({ queryKey: ["admin", "products"] });
       navigate({ to: "/admin/produtos/$id", params: { id } });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const columns: Column<Row>[] = [
