@@ -1,13 +1,17 @@
-import { useRouterState } from "@tanstack/react-router";
-import { Home, Search, ShoppingBag, Heart, User } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Home, Search, ShoppingBag, User } from "lucide-react";
 import { useCart, cartCount } from "@/store/cart";
 
-type NavItem = { to: string; label: string; icon: typeof Home; badge?: boolean };
+type NavItem = {
+  to: "/" | "/produtos" | "/carrinho" | "/conta";
+  label: string;
+  icon: typeof Home;
+  badge?: boolean;
+};
 const items: NavItem[] = [
   { to: "/", label: "Início", icon: Home },
   { to: "/produtos", label: "Buscar", icon: Search },
   { to: "/carrinho", label: "Sacola", icon: ShoppingBag, badge: true },
-  { to: "/conta/favoritos", label: "Favoritos", icon: Heart },
   { to: "/conta", label: "Conta", icon: User },
 ];
 
@@ -22,8 +26,8 @@ export function BottomNav() {
           const active = to === "/" ? path === "/" : path.startsWith(to);
           return (
             <li key={to} className="flex-1">
-              <a
-                href={to}
+              <Link
+                to={to}
                 className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors ${
                   active ? "text-foreground" : "text-muted-foreground"
                 }`}
@@ -37,7 +41,7 @@ export function BottomNav() {
                   )}
                 </span>
                 {label}
-              </a>
+              </Link>
             </li>
           );
         })}
