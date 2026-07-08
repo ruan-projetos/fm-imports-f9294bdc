@@ -80,23 +80,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0a0a0a" },
-      { title: "FM IMPORTS · Moda premium importada" },
+      { title: "FM IMPORTS · Moda Masculina" },
       {
         name: "description",
         content:
           "FM IMPORTS — moda premium importada. Camisetas, tênis, perfumes, relógios e acessórios com curadoria exclusiva.",
       },
-      { property: "og:title", content: "FM IMPORTS · Moda premium importada" },
+      { property: "og:title", content: "FM IMPORTS · Moda Masculina" },
       {
         property: "og:description",
-        content: "Curadoria premium de streetwear, tênis, perfumes e acessórios.",
+        content: "FM IMPORTS — moda premium importada. Camisetas, tênis, perfumes, relógios e acessórios com curadoria exclusiva.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "FM IMPORTS · Moda Masculina" },
+      { name: "twitter:description", content: "FM IMPORTS — moda premium importada. Camisetas, tênis, perfumes, relógios e acessórios com curadoria exclusiva." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/klPvrlPPouZg1pYnTHcRlyiDtUh2/social-images/social-1783515987029-Shop_(1).webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/klPvrlPPouZg1pYnTHcRlyiDtUh2/social-images/social-1783515987029-Shop_(1).webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/jpeg", href: "/logo-fm.jpg" },
       { rel: "apple-touch-icon", href: "/logo-fm.jpg" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       {
