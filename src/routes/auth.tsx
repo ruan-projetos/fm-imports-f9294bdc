@@ -1,9 +1,14 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+type AuthSearch = { redirect?: string };
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>): AuthSearch => ({
+    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  }),
   component: AuthPage,
 });
 
