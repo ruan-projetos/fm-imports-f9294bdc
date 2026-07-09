@@ -100,7 +100,7 @@ function CheckoutPage() {
         p_delivery_type: deliveryType,
         p_delivery_address: deliveryType === "delivery" ? address : { city, pickup: true },
         p_payment_method: paymentMethod,
-        p_notes: notes || null,
+        p_notes: notes || "",
       });
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
