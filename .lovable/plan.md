@@ -1,131 +1,105 @@
+## Fase 2 — Checkout, Pedidos e WhatsApp
 
-# Fase 2 — Painel Administrativo FM IMPORTS
+Escopo grande. Antes de implementar, alinho a arquitetura para você aprovar.
 
-Objetivo: entregar uma área `/admin` completa, protegida por role, com identidade visual da Fase 1 (dark + dourado), inspirada em Shopify/Stripe/Linear. Loja pública não é alterada.
+### 1. Banco de dados (migração)
 
----
+**Ampliar enum `order_status`** com os novos estados exigidos:
+- `awaiting_store_confirmation` (aguardando confirmação da loja — PIX)
+- `awaiting_pix_payment` (aguardando pagamento PIX)
+- `payment_confirmed`
+- `separating` (separando pedido)
+- `out_for_delivery` (saiu para entrega)
+- `ready_for_pickup` (disponível para retirada)
 
-## 1. Arquitetura de rotas
+Os valores atuais (`pending`, `paid`, `processing`, `shipped`, `delivered`, `cancelled`, `refunded`) são mantidos por compatibilidade. `pending` = "Novo pedido".
 
-Camada admin usando pathless layout **dentro** do gate `_authenticated` para reaproveitar a proteção de sessão do integration:
+**Ampliar enum `payment_method`** com:
+- `pix` (PIX manual via WhatsApp — sem QR automático)
+- `on_delivery` (pagar na entrega)
 
-```text
-src/routes/
-├─ _authenticated/
-│  ├─ route.tsx                 (managed — não editar)
-│  └─ _admin/
-│     ├─ route.tsx              layout admin: verifica has_role('admin'), renderiza <AdminShell/>
-│     ├─ admin.index.tsx        Dashboard
-│     ├─ admin.produtos.index.tsx
-│     ├─ admin.produtos.novo.tsx
-│     ├─ admin.produtos.$id.tsx        (editor com abas: geral / variações / imagens / SEO)
-│     ├─ admin.categorias.tsx
-│     ├─ admin.marcas.tsx
-│     ├─ admin.pedidos.index.tsx
-│     ├─ admin.pedidos.$id.tsx
-│     ├─ admin.clientes.index.tsx
-│     ├─ admin.clientes.$id.tsx
-│     ├─ admin.banners.tsx
-│     ├─ admin.cupons.tsx
-│     ├─ admin.avaliacoes.tsx
-│     ├─ admin.configuracoes.tsx
-│     └─ admin.perfil.tsx
-```
+Mantenho `mercado_pago_pix`, `mercado_pago_card`, `whatsapp` para não quebrar nada.
 
-`_admin/route.tsx` faz `beforeLoad` client-side chamando um serverFn `getMyRole` (com `requireSupabaseAuth`) e redireciona não-admins para `/`.
+**Novos campos em `orders`:**
+- `delivery_type` (`text`, `delivery` | `pickup`, default `delivery`) — preparado para futura expansão (transportadora, correios etc. sem breaking change).
+- `delivery_address` (`jsonb`) — snapshot detalhado (cidade, bairro, rua, número, complemento, ponto de referência, whatsapp).
+- Já existem: `customer_snapshot`, `address_snapshot`, `notes`, `total`, `order_number`.
 
----
+**RPC `create_order`** (`SECURITY DEFINER`) — cria pedido atômico:
+1. Valida estoque de cada variante.
+2. Insere `orders` + `order_items`.
+3. Decrementa `product_variants.stock` (reserva).
+4. Retorna `{ id, order_number }`.
 
-## 2. Backend / Banco
+**RPC `cancel_order`** — devolve estoque ao cancelar. Trigger em `orders.status` chama isso se novo status for `cancelled` e antigo não era.
 
-Migration incremental (não recria tabelas da Fase 1):
+**Policies:** ajusto `orders_own_insert` para permitir insert via RPC (já é `authenticated`), e adiciono policy de update pelo próprio dono apenas para `cancelled` (opcional — Fase 3).
 
-- **Storage buckets** (via tool): `products` (público), `banners` (público), `categories` (público), `brands` (público), `avatars` (público).
-- **Políticas RLS** em `storage.objects`: leitura pública nos 5 buckets; INSERT/UPDATE/DELETE apenas para `has_role(auth.uid(),'admin')`.
-- **Coluna extra**: `reviews.approved boolean default false` + `categories.icon text`.
-- **Policies admin faltantes**: garantir que admin tem ALL em `products, product_variants, product_images, categories, brands, banners, coupons, reviews, site_settings, orders, order_items, notifications, addresses (SELECT), profiles (SELECT), user_roles (SELECT/UPDATE)`.
-- **Trigger** `set_order_number` (gera `FM-YYYYMMDD-XXXX`) e `slugify` helper para categorias/marcas/produtos.
-- **View/RPCs** para o dashboard:
-  - `admin_kpis()` → receita_total, receita_mes, pedidos_total, pedidos_pendentes, clientes, produtos, low_stock, out_of_stock.
-  - `admin_sales_by_day(days int)` → série temporal.
-  - `admin_top_products(limit int)`.
-  - `admin_top_categories(limit int)`.
-  - Todas `SECURITY DEFINER` com check `has_role`.
+### 2. Frontend
 
----
+**Novas rotas:**
+- `src/routes/checkout.tsx` — formulário completo (Nome, WhatsApp, Cidade, Bairro, Rua, Número, Complemento, Ponto de referência), seletor de entrega (Entrega FM / Retirar), seletor de pagamento (PIX / Pagar na entrega), aviso "Atualmente realizamos entregas apenas em Quixeré e cidades da região.", resumo do carrinho, botão "Finalizar pedido".
+- `src/routes/pedido.$id.tsx` — página de confirmação: número, resumo, forma de pagamento/entrega, status, botão "Acompanhar pelo WhatsApp".
+- `src/routes/conta.pedidos.tsx` — "Meus pedidos" (lista + status + botão WhatsApp). Substitui o placeholder atual em `/conta`.
 
-## 3. Server functions (`src/lib/admin.functions.ts`)
+**Fluxo pós-checkout:**
+1. Chama `create_order` RPC.
+2. Toast "Pedido criado com sucesso."
+3. `useCart.clear()`.
+4. Abre WhatsApp da loja em nova aba com mensagem pré-preenchida (template PIX ou Pagar-na-entrega).
+5. Redireciona para `/pedido/:id`.
 
-Todas com `.middleware([requireSupabaseAuth])` + checagem `has_role`:
+**Utilitário `src/lib/whatsapp.ts`:**
+- `buildOrderMessage(order, items, paymentMethod)` — gera template PIX / Pagar-na-entrega.
+- `buildStatusMessage(order, newStatus)` — templates automáticos (separando, saiu, retirada, entregue).
+- `openWhatsApp(number, message)` — abre em nova aba.
 
-- `getMyRole`
-- `getDashboardKpis`, `getSalesSeries`, `getTopProducts`, `getTopCategories`
-- `listProductsAdmin(filter)`, `getProductAdmin(id)`, `upsertProduct`, `duplicateProduct`, `deleteProduct`
-- `upsertVariant`, `deleteVariant`, `bulkUpdateStock`
-- `upsertProductImage`, `reorderProductImages`, `deleteProductImage`
-- `listCategories/upsertCategory/deleteCategory` (idem marcas)
-- `listOrders`, `getOrder`, `updateOrderStatus`
-- `listCustomers`, `getCustomer`
-- CRUD `banners`, `coupons`
-- `listReviews`, `setReviewApproval`, `deleteReview`
-- `getSettings`, `updateSettings` (upsert em `site_settings` chave/valor)
+### 3. Painel admin (`/admin/pedidos`)
 
-Uploads: cliente usa `supabase.storage.from(bucket).upload(...)` diretamente (RLS aplica), depois grava a URL via serverFn.
+**Enriquecer listagem:**
+- Colunas: número, cliente, WhatsApp, cidade, forma de entrega, forma de pagamento, valor, data, status.
+- Busca já existe → ampliar para incluir cidade e telefone.
+- **Filtros:** status (multi), forma de entrega, forma de pagamento, período.
+- **Alteração rápida de status:** select inline por linha.
+- **Botão "Enviar mensagem":** abre WhatsApp do cliente com template automático da mudança de status (se aplicável) ou vazio.
 
----
+**Página detalhe (`/admin/pedidos/$id`):**
+- Já existe, apenas atualizo `STATUSES` com os novos valores e adiciono os campos novos (delivery_type, delivery_address, referência).
+- Botão "Enviar mensagem ao cliente" com template baseado no status atual.
 
-## 4. UI / Design System
+**StatusBadge:** adicionar mapeamento visual e labels em PT-BR para os novos status.
 
-Reutiliza tokens da Fase 1. Novos primitivos em `src/components/admin/`:
+### 4. Estoque
 
-- `AdminShell` — grid: `Sidebar` fixa (desktop) + `Sheet` drawer (mobile) + `Topbar` (breadcrumbs, busca global, avatar/menu).
-- `AdminSidebar` — usa `shadcn/ui/sidebar` collapsible=icon, ícones Lucide, item ativo com bar dourada à esquerda.
-- `KpiCard`, `StatDelta`, `SectionHeader`, `DataTable` (busca + filtros + paginação + ordenação + skeleton + empty state), `ConfirmDialog`, `ImageUploader` (drag&drop + reorder via dnd-kit), `VariantMatrix` (grid cor×tamanho), `StatusBadge`, `PageContainer`.
-- Toasts via `sonner`.
-- Gráficos: `recharts` (Area, Bar, Donut) com tema dark + accent dourado.
-- Micro-animações via `framer-motion` (fade/slide sutis).
+- **Criar pedido** → RPC decrementa `variants.stock`.
+- **Cancelar pedido** → trigger devolve ao estoque.
+- **Entregar** → nada (já estava reservado). Documento isso em DATABASE.md como "reservado no create, definitivo no delivered".
+
+### 5. Documentação
+
+Atualizar `CHANGELOG.md`, `DATABASE.md` (novos enums, RPCs, triggers) e `README.md` com o fluxo completo.
 
 ---
 
-## 5. Telas — detalhes-chave
+### Arquivos a criar/editar
 
-**Dashboard**: 8 KpiCards em grid responsivo, 2 gráficos grandes (vendas 30d, categorias donut), 2 tabelas (últimos pedidos, produtos low-stock).
+**Criar**
+- `supabase/migrations/<ts>_checkout_orders.sql`
+- `src/routes/checkout.tsx`
+- `src/routes/pedido.$id.tsx`
+- `src/routes/conta.pedidos.tsx`
+- `src/lib/whatsapp.ts`
 
-**Produtos**: DataTable com thumb, nome, categoria, preço, estoque agregado, status. Ações: editar, duplicar, excluir. Editor em Tabs: Geral / Preços / Variações (matriz cor×tamanho editável inline) / Imagens (upload + reorder + capa) / SEO (slug, tags, meta).
+**Editar**
+- `src/components/admin/StatusBadge.tsx` (novos status)
+- `src/routes/admin.pedidos.index.tsx` (filtros, colunas, mudança rápida, botão WhatsApp)
+- `src/routes/admin.pedidos.$id.tsx` (novos status + campos + botão WhatsApp cliente)
+- `src/routes/carrinho.tsx` (habilitar botão "Finalizar" → `/checkout`)
+- `src/routes/conta.tsx` (link para `/conta/pedidos`)
+- `CHANGELOG.md`, `DATABASE.md`, `README.md`
 
-**Pedidos**: tabela + detalhe com timeline de status (pending→paid→shipped→delivered), snapshot de endereço, itens com thumb, botões para avançar status.
+### Pontos que quero confirmar
 
-**Clientes**: lista com métricas agregadas via join (count pedidos, sum total). Detalhe: dados, endereços, pedidos.
-
-**Configurações**: form único salvando em `site_settings` (chaves: `store`, `contact`, `social`, `payment`, `footer`).
-
----
-
-## 6. Dependências novas
-
-`recharts`, `@dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`, `date-fns` (já pode estar), `framer-motion`.
-
----
-
-## 7. Ordem de execução
-
-1. Migration (buckets, policies, colunas, RPCs).
-2. `admin.functions.ts` + helpers.
-3. `AdminShell` + sidebar/topbar + primitivos (`DataTable`, `KpiCard`, `ImageUploader`, `ConfirmDialog`).
-4. Dashboard.
-5. Produtos (CRUD + variações + imagens).
-6. Categorias, Marcas, Banners, Cupons.
-7. Pedidos + Clientes.
-8. Avaliações + Configurações + Perfil.
-9. Link "Admin" no header quando `has_role('admin')`.
-10. Revisão responsiva + polish + atualização de `CHANGELOG.md`, `README.md`, `DATABASE.md`.
-
----
-
-## 8. Perguntas rápidas antes de codar
-
-1. **Email do admin inicial** — qual email deve receber a role `admin` no seed? (posso criar um serverFn `promoteToAdmin` protegido por chave, ou já plantar via SQL o `user_roles` do UID que você indicar depois do cadastro).
-2. **Login social Google** — habilito agora ou mantenho só email/senha nesta fase?
-3. **Checkout (WhatsApp + Mercado Pago)** — esta fase é só admin; o checkout do cliente fica para a Fase 3 conforme roadmap original, correto? (o pedido de agora foca no painel — quero confirmar antes de escopo creep).
-
-Sem bloqueio: posso começar assumindo (1) você promove seu usuário depois via SQL, (2) só email/senha, (3) checkout na Fase 3.
+1. **Login obrigatório para checkout?** Como as policies exigem `auth.uid()` no insert de `orders`, o cliente precisa estar logado. Se quiser guest checkout eu ajusto policies + `user_id nullable`. Por padrão vou exigir login (mais seguro e alinhado ao esquema atual).
+2. **Estoque:** decremento imediato no create, retorno no cancel. Confirma?
+3. Posso prosseguir com a implementação completa?
