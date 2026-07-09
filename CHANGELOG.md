@@ -4,6 +4,30 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [Fase 2 — Checkout & Pedidos] — 2026-07-09
+
+### Adicionado
+
+- **Checkout completo** (`/checkout`) — formulário (Nome, WhatsApp, Cidade, Bairro, Rua, Número, Complemento, Ponto de referência), seletor de entrega (Entrega FM / Retirar na loja) e pagamento (PIX / Pagar na entrega). Aviso de cobertura Quixeré e região.
+- **Página de confirmação** (`/pedido/:id`) — resumo, status, botão "Acompanhar pelo WhatsApp".
+- **Meus pedidos** (`/conta/pedidos`) — lista de pedidos do cliente com status e atalho WhatsApp.
+- **`src/lib/whatsapp.ts`** — templates para mensagem inicial (PIX / Pagar na entrega) e mensagens automáticas por status (separando, saiu, retirada, entregue, cancelado, pgto confirmado). Número da loja: `+55 88 98190-7458`.
+- **RPC `create_order`** — cria pedido + itens atomicamente, valida e reserva estoque em `product_variants`.
+- **Trigger `restore_stock_on_cancel`** — devolve estoque ao mudar status para `cancelled`.
+- **Novos status** em `order_status`: `awaiting_store_confirmation`, `awaiting_pix_payment`, `payment_confirmed`, `separating`, `out_for_delivery`, `ready_for_pickup`.
+- **Novos métodos** em `payment_method`: `pix`, `on_delivery`.
+- **Novas colunas em `orders`**: `delivery_type` (`delivery` | `pickup`), `delivery_address` (jsonb), `customer_phone`.
+- **Admin › Pedidos** — colunas cidade / entrega / pagamento; filtros por status, entrega, pagamento; alteração rápida de status inline; botão WhatsApp por linha.
+- **Admin › Pedido detalhe** — mostra tipo de entrega, endereço completo com referência, botão "Enviar mensagem" com template automático baseado no status atual.
+
+### Observações
+
+- Estoque: reservado no `create_order`, devolvido em `cancelled`. O status `delivered` mantém a baixa (já reservada) como definitiva.
+- Compatibilidade: valores antigos de enum (`pending`, `paid`, `shipped`, etc.) preservados.
+
+---
+
+
 ## [Fase 2 — Hotfix] — Tipagem e correções — 2026-07-07
 
 ### Corrigido

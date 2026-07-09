@@ -78,13 +78,16 @@ function ContaPage() {
             <div className="text-xs text-muted-foreground">Em breve</div>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 text-sm">
+        <Link
+          to="/conta/pedidos"
+          className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 text-sm hover:border-gold"
+        >
           <Package className="h-5 w-5 text-muted-foreground" />
           <div className="flex-1">
             <div className="font-medium">Meus pedidos</div>
-            <div className="text-xs text-muted-foreground">Em breve</div>
+            <div className="text-xs text-muted-foreground">Acompanhe pedidos e status</div>
           </div>
-        </div>
+        </Link>
 
         <button
           onClick={handleLogout}

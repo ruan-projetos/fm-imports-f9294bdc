@@ -331,7 +331,10 @@ export type Database = {
           address_snapshot: Json | null
           coupon_code: string | null
           created_at: string
+          customer_phone: string | null
           customer_snapshot: Json | null
+          delivery_address: Json | null
+          delivery_type: string
           discount: number
           id: string
           mp_payment_id: string | null
@@ -351,7 +354,10 @@ export type Database = {
           address_snapshot?: Json | null
           coupon_code?: string | null
           created_at?: string
+          customer_phone?: string | null
           customer_snapshot?: Json | null
+          delivery_address?: Json | null
+          delivery_type?: string
           discount?: number
           id?: string
           mp_payment_id?: string | null
@@ -371,7 +377,10 @@ export type Database = {
           address_snapshot?: Json | null
           coupon_code?: string | null
           created_at?: string
+          customer_phone?: string | null
           customer_snapshot?: Json | null
+          delivery_address?: Json | null
+          delivery_type?: string
           discount?: number
           id?: string
           mp_payment_id?: string | null
@@ -695,6 +704,20 @@ export type Database = {
           sold: number
         }[]
       }
+      create_order: {
+        Args: {
+          p_customer: Json
+          p_delivery_address: Json
+          p_delivery_type: string
+          p_items: Json
+          p_notes?: string
+          p_payment_method: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: {
+          id: string
+          order_number: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -714,7 +737,18 @@ export type Database = {
         | "delivered"
         | "cancelled"
         | "refunded"
-      payment_method: "mercado_pago_pix" | "mercado_pago_card" | "whatsapp"
+        | "awaiting_store_confirmation"
+        | "awaiting_pix_payment"
+        | "payment_confirmed"
+        | "separating"
+        | "out_for_delivery"
+        | "ready_for_pickup"
+      payment_method:
+        | "mercado_pago_pix"
+        | "mercado_pago_card"
+        | "whatsapp"
+        | "pix"
+        | "on_delivery"
       payment_status: "pending" | "approved" | "rejected" | "refunded"
     }
     CompositeTypes: {
@@ -853,8 +887,20 @@ export const Constants = {
         "delivered",
         "cancelled",
         "refunded",
+        "awaiting_store_confirmation",
+        "awaiting_pix_payment",
+        "payment_confirmed",
+        "separating",
+        "out_for_delivery",
+        "ready_for_pickup",
       ],
-      payment_method: ["mercado_pago_pix", "mercado_pago_card", "whatsapp"],
+      payment_method: [
+        "mercado_pago_pix",
+        "mercado_pago_card",
+        "whatsapp",
+        "pix",
+        "on_delivery",
+      ],
       payment_status: ["pending", "approved", "rejected", "refunded"],
     },
   },
