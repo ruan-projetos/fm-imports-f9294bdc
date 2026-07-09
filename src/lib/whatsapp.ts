@@ -8,21 +8,26 @@ export type OrderLike = {
   total: number | string;
   delivery_type?: string | null;
   payment_method?: string | null;
-  customer_snapshot?: { name?: string; phone?: string } | null;
+  customer_snapshot?: { name?: string | null; phone?: string | null } | null;
   delivery_address?: {
-    city?: string;
-    neighborhood?: string;
-    street?: string;
-    number?: string;
-    complement?: string;
-    reference?: string;
+    city?: string | null;
+    neighborhood?: string | null;
+    street?: string | null;
+    number?: string | null;
+    complement?: string | null;
+    reference?: string | null;
   } | null;
 };
 
 export type OrderItemLike = {
   quantity: number;
   unit_price: number | string;
-  product_snapshot?: { name?: string; color?: string; size?: string } | null;
+  product_snapshot?: {
+    name?: string | null;
+    color?: string | null;
+    size?: string | null;
+    image?: string | null;
+  } | null;
 };
 
 function fmt(n: number | string) {

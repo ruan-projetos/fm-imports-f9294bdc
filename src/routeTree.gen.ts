@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ContaRouteImport } from './routes/conta'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -17,6 +18,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProdutosIndexRouteImport } from './routes/produtos.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProdutosSlugRouteImport } from './routes/produtos.$slug'
+import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
+import { Route as ContaPedidosRouteImport } from './routes/conta.pedidos'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AdminPerfilRouteImport } from './routes/admin.perfil'
 import { Route as AdminMarcasRouteImport } from './routes/admin.marcas'
@@ -36,6 +39,11 @@ import { Route as AdminClientesIdRouteImport } from './routes/admin.clientes.$id
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarrinhoRoute = CarrinhoRouteImport.update({
@@ -72,6 +80,16 @@ const ProdutosSlugRoute = ProdutosSlugRouteImport.update({
   id: '/produtos/$slug',
   path: '/produtos/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoIdRoute = PedidoIdRouteImport.update({
+  id: '/pedido/$id',
+  path: '/pedido/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaPedidosRoute = ContaPedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => ContaRoute,
 } as any)
 const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
   id: '/categoria/$slug',
@@ -154,7 +172,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
-  '/conta': typeof ContaRoute
+  '/checkout': typeof CheckoutRoute
+  '/conta': typeof ContaRouteWithChildren
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -163,6 +182,8 @@ export interface FileRoutesByFullPath {
   '/admin/marcas': typeof AdminMarcasRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
+  '/conta/pedidos': typeof ContaPedidosRoute
+  '/pedido/$id': typeof PedidoIdRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/produtos/': typeof ProdutosIndexRoute
@@ -178,7 +199,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
-  '/conta': typeof ContaRoute
+  '/checkout': typeof CheckoutRoute
+  '/conta': typeof ContaRouteWithChildren
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -187,6 +209,8 @@ export interface FileRoutesByTo {
   '/admin/marcas': typeof AdminMarcasRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
+  '/conta/pedidos': typeof ContaPedidosRoute
+  '/pedido/$id': typeof PedidoIdRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/admin': typeof AdminIndexRoute
   '/produtos': typeof ProdutosIndexRoute
@@ -204,7 +228,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/carrinho': typeof CarrinhoRoute
-  '/conta': typeof ContaRoute
+  '/checkout': typeof CheckoutRoute
+  '/conta': typeof ContaRouteWithChildren
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/categorias': typeof AdminCategoriasRoute
@@ -213,6 +238,8 @@ export interface FileRoutesById {
   '/admin/marcas': typeof AdminMarcasRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
+  '/conta/pedidos': typeof ContaPedidosRoute
+  '/pedido/$id': typeof PedidoIdRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/produtos/': typeof ProdutosIndexRoute
@@ -231,6 +258,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/carrinho'
+    | '/checkout'
     | '/conta'
     | '/admin/avaliacoes'
     | '/admin/banners'
@@ -240,6 +268,8 @@ export interface FileRouteTypes {
     | '/admin/marcas'
     | '/admin/perfil'
     | '/categoria/$slug'
+    | '/conta/pedidos'
+    | '/pedido/$id'
     | '/produtos/$slug'
     | '/admin/'
     | '/produtos/'
@@ -255,6 +285,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/carrinho'
+    | '/checkout'
     | '/conta'
     | '/admin/avaliacoes'
     | '/admin/banners'
@@ -264,6 +295,8 @@ export interface FileRouteTypes {
     | '/admin/marcas'
     | '/admin/perfil'
     | '/categoria/$slug'
+    | '/conta/pedidos'
+    | '/pedido/$id'
     | '/produtos/$slug'
     | '/admin'
     | '/produtos'
@@ -280,6 +313,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/carrinho'
+    | '/checkout'
     | '/conta'
     | '/admin/avaliacoes'
     | '/admin/banners'
@@ -289,6 +323,8 @@ export interface FileRouteTypes {
     | '/admin/marcas'
     | '/admin/perfil'
     | '/categoria/$slug'
+    | '/conta/pedidos'
+    | '/pedido/$id'
     | '/produtos/$slug'
     | '/admin/'
     | '/produtos/'
@@ -306,8 +342,10 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   CarrinhoRoute: typeof CarrinhoRoute
-  ContaRoute: typeof ContaRoute
+  CheckoutRoute: typeof CheckoutRoute
+  ContaRoute: typeof ContaRouteWithChildren
   CategoriaSlugRoute: typeof CategoriaSlugRoute
+  PedidoIdRoute: typeof PedidoIdRoute
   ProdutosSlugRoute: typeof ProdutosSlugRoute
   ProdutosIndexRoute: typeof ProdutosIndexRoute
 }
@@ -319,6 +357,13 @@ declare module '@tanstack/react-router' {
       path: '/conta'
       fullPath: '/conta'
       preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carrinho': {
@@ -369,6 +414,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/produtos/$slug'
       preLoaderRoute: typeof ProdutosSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$id': {
+      id: '/pedido/$id'
+      path: '/pedido/$id'
+      fullPath: '/pedido/$id'
+      preLoaderRoute: typeof PedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta/pedidos': {
+      id: '/conta/pedidos'
+      path: '/pedidos'
+      fullPath: '/conta/pedidos'
+      preLoaderRoute: typeof ContaPedidosRouteImport
+      parentRoute: typeof ContaRoute
     }
     '/categoria/$slug': {
       id: '/categoria/$slug'
@@ -516,13 +575,25 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface ContaRouteChildren {
+  ContaPedidosRoute: typeof ContaPedidosRoute
+}
+
+const ContaRouteChildren: ContaRouteChildren = {
+  ContaPedidosRoute: ContaPedidosRoute,
+}
+
+const ContaRouteWithChildren = ContaRoute._addFileChildren(ContaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   CarrinhoRoute: CarrinhoRoute,
-  ContaRoute: ContaRoute,
+  CheckoutRoute: CheckoutRoute,
+  ContaRoute: ContaRouteWithChildren,
   CategoriaSlugRoute: CategoriaSlugRoute,
+  PedidoIdRoute: PedidoIdRoute,
   ProdutosSlugRoute: ProdutosSlugRoute,
   ProdutosIndexRoute: ProdutosIndexRoute,
 }
