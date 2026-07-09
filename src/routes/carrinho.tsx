@@ -118,14 +118,14 @@ function CartPage() {
             <span className="text-sm font-medium">Total</span>
             <span className="font-display text-2xl font-bold">{formatBRL(total)}</span>
           </div>
-          <button
-            disabled
-            className="mt-6 w-full rounded-full gradient-gold py-3.5 text-sm font-semibold text-black opacity-60"
+          <Link
+            to="/checkout"
+            className="mt-6 flex w-full items-center justify-center rounded-full gradient-gold py-3.5 text-sm font-semibold text-black transition hover:opacity-95"
           >
-            Finalizar compra (em breve)
-          </button>
+            Finalizar compra
+          </Link>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            Checkout Mercado Pago + WhatsApp na Fase 2
+            Entregas em Quixeré e região · PIX ou pagar na entrega
           </p>
         </aside>
       </div>
