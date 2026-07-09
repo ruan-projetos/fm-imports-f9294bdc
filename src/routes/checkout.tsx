@@ -84,7 +84,7 @@ function CheckoutPage() {
         },
       }));
 
-      const customer = { name, phone, email: null as string | null };
+      const customer = { name, phone };
       const address = {
         city,
         neighborhood,

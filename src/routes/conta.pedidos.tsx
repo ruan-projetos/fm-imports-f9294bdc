@@ -5,7 +5,7 @@ import { MessageCircle, Loader2, ShoppingBag, ChevronRight } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { formatBRL } from "@/lib/format";
-import { buildOrderMessage, openWhatsApp, STORE_WHATSAPP } from "@/lib/whatsapp";
+import { buildOrderMessage, openWhatsApp, STORE_WHATSAPP, type OrderLike } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/conta/pedidos")({
   ssr: false,
@@ -96,8 +96,8 @@ function MyOrdersPage() {
                   total: o.total,
                   delivery_type: o.delivery_type,
                   payment_method: o.payment_method,
-                  customer_snapshot: o.customer_snapshot,
-                  delivery_address: o.delivery_address,
+                  customer_snapshot: o.customer_snapshot as OrderLike["customer_snapshot"],
+                  delivery_address: o.delivery_address as OrderLike["delivery_address"],
                 },
                 items.map((it) => ({
                   quantity: it.quantity,
