@@ -15,7 +15,7 @@ import {
   User,
   LogOut,
   Menu,
-  X,
+  Home,
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 type NavRoute =
   | "/admin"
+  | "/admin/homepage"
   | "/admin/produtos"
   | "/admin/categorias"
   | "/admin/marcas"
@@ -38,6 +39,7 @@ type NavRoute =
 type NavItem = { to: NavRoute; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 const NAV: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/homepage", label: "Homepage", icon: Home },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/marcas", label: "Marcas", icon: Ribbon },
