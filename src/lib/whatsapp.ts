@@ -2,6 +2,8 @@
 // Templates for order creation and automatic status update messages.
 
 export const STORE_WHATSAPP = "5588981907458";
+export const STORE_INSTAGRAM = "f.m_importsreserva";
+export const STORE_LOCATION_URL = "https://maps.app.goo.gl/xiGs8XQWAWrjicAn9";
 
 export type OrderLike = {
   order_number: string;
