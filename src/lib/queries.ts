@@ -1,6 +1,34 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type HomeSettings = {
+  id: string;
+  hero_title: string | null;
+  hero_subtitle: string | null;
+  hero_cta_label: string | null;
+  hero_cta_href: string | null;
+  hero_image_url: string | null;
+  coupon_active: boolean;
+  coupon_title: string | null;
+  coupon_text: string | null;
+  coupon_code: string | null;
+  coupon_color: string | null;
+};
+
+export type HomeSection = {
+  id: string;
+  key: string;
+  title: string;
+  subtitle: string | null;
+  type: "products" | "brands" | "custom";
+  source: "manual" | "featured" | "newest" | "bestsellers" | "promotions" | "category" | "brand";
+  source_ref: string | null;
+  view_all_href: string | null;
+  item_limit: number;
+  sort_order: number;
+  active: boolean;
+};
+
 export type Category = {
   id: string;
   name: string;
