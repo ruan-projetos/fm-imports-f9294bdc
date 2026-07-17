@@ -23,6 +23,7 @@ import { Route as ContaPedidosRouteImport } from './routes/conta.pedidos'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AdminPerfilRouteImport } from './routes/admin.perfil'
 import { Route as AdminMarcasRouteImport } from './routes/admin.marcas'
+import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
 import { Route as AdminCuponsRouteImport } from './routes/admin.cupons'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
@@ -106,6 +107,11 @@ const AdminMarcasRoute = AdminMarcasRouteImport.update({
   path: '/marcas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHomepageRoute = AdminHomepageRouteImport.update({
+  id: '/homepage',
+  path: '/homepage',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCuponsRoute = AdminCuponsRouteImport.update({
   id: '/cupons',
   path: '/cupons',
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
+  '/admin/homepage': typeof AdminHomepageRoute
   '/admin/marcas': typeof AdminMarcasRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
+  '/admin/homepage': typeof AdminHomepageRoute
   '/admin/marcas': typeof AdminMarcasRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
+  '/admin/homepage': typeof AdminHomepageRoute
   '/admin/marcas': typeof AdminMarcasRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/cupons'
+    | '/admin/homepage'
     | '/admin/marcas'
     | '/admin/perfil'
     | '/categoria/$slug'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/cupons'
+    | '/admin/homepage'
     | '/admin/marcas'
     | '/admin/perfil'
     | '/categoria/$slug'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/admin/categorias'
     | '/admin/configuracoes'
     | '/admin/cupons'
+    | '/admin/homepage'
     | '/admin/marcas'
     | '/admin/perfil'
     | '/categoria/$slug'
@@ -450,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMarcasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/homepage': {
+      id: '/admin/homepage'
+      path: '/homepage'
+      fullPath: '/admin/homepage'
+      preLoaderRoute: typeof AdminHomepageRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cupons': {
       id: '/admin/cupons'
       path: '/cupons'
@@ -543,6 +562,7 @@ interface AdminRouteChildren {
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminCuponsRoute: typeof AdminCuponsRoute
+  AdminHomepageRoute: typeof AdminHomepageRoute
   AdminMarcasRoute: typeof AdminMarcasRoute
   AdminPerfilRoute: typeof AdminPerfilRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -561,6 +581,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminCuponsRoute: AdminCuponsRoute,
+  AdminHomepageRoute: AdminHomepageRoute,
   AdminMarcasRoute: AdminMarcasRoute,
   AdminPerfilRoute: AdminPerfilRoute,
   AdminIndexRoute: AdminIndexRoute,
