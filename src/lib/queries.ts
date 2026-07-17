@@ -1,6 +1,34 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type HomeSettings = {
+  id: string;
+  hero_title: string | null;
+  hero_subtitle: string | null;
+  hero_cta_label: string | null;
+  hero_cta_href: string | null;
+  hero_image_url: string | null;
+  coupon_active: boolean;
+  coupon_title: string | null;
+  coupon_text: string | null;
+  coupon_code: string | null;
+  coupon_color: string | null;
+};
+
+export type HomeSection = {
+  id: string;
+  key: string;
+  title: string;
+  subtitle: string | null;
+  type: "products" | "brands" | "custom";
+  source: "manual" | "featured" | "newest" | "bestsellers" | "promotions" | "category" | "brand";
+  source_ref: string | null;
+  view_all_href: string | null;
+  item_limit: number;
+  sort_order: number;
+  active: boolean;
+};
+
 export type Category = {
   id: string;
   name: string;
@@ -227,6 +255,82 @@ export function productDetailQuery(slug: string) {
         category: (data as any).categories,
         brand: (data as any).brands,
       };
+    },
+  });
+}
+
+export const homeSettingsQuery = queryOptions({
+  queryKey: ["home_settings"],
+  queryFn: async (): Promise<HomeSettings | null> => {
+    const { data, error } = await supabase
+      .from("home_settings")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return (data as HomeSettings) ?? null;
+  },
+});
+
+export const homeSectionsQuery = queryOptions({
+  queryKey: ["home_sections"],
+  queryFn: async (): Promise<HomeSection[]> => {
+    const { data, error } = await supabase
+      .from("home_sections")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order");
+    if (error) throw error;
+    return (data ?? []) as HomeSection[];
+  },
+});
+
+export function homeSectionProductsQuery(section: HomeSection) {
+  return queryOptions({
+    queryKey: ["home_section_products", section.id, section.source, section.source_ref, section.item_limit],
+    queryFn: async (): Promise<ProductWithImage[]> => {
+      const lim = section.item_limit || 8;
+
+      if (section.source === "manual") {
+        const { data, error } = await supabase
+          .from("home_section_products")
+          .select(`sort_order, product:products(${productSelect})`)
+          .eq("section_id", section.id)
+          .order("sort_order");
+        if (error) throw error;
+        return (data ?? [])
+          .map((r: any) => r.product)
+          .filter(Boolean)
+          .map(normalizeProduct)
+          .slice(0, lim);
+      }
+
+      let q = supabase.from("products").select(productSelect).eq("active", true);
+
+      switch (section.source) {
+        case "featured":
+          q = q.eq("is_featured", true);
+          break;
+        case "newest":
+          q = q.eq("is_new", true).order("created_at", { ascending: false });
+          break;
+        case "bestsellers":
+          q = q.eq("is_bestseller", true).order("sales_count", { ascending: false });
+          break;
+        case "promotions":
+          q = q.not("sale_price", "is", null);
+          break;
+        case "category":
+          if (section.source_ref) q = q.eq("category_id", section.source_ref);
+          break;
+        case "brand":
+          if (section.source_ref) q = q.eq("brand_id", section.source_ref);
+          break;
+      }
+
+      const { data, error } = await q.limit(lim);
+      if (error) throw error;
+      return (data ?? []).map(normalizeProduct);
     },
   });
 }
