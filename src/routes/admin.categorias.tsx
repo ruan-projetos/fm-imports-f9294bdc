@@ -220,12 +220,24 @@ function CategoriesPage() {
                   />
                 </div>
                 <div>
-                  <Label>Ícone (Lucide)</Label>
-                  <Input
+                  <Label>Ícone</Label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={editing.icon ?? ""}
-                    placeholder="ex: shirt"
-                    onChange={(e) => setEditing({ ...editing, icon: e.target.value })}
-                  />
+                    onChange={(e) => setEditing({ ...editing, icon: e.target.value || null })}
+                  >
+                    <option value="">— nenhum —</option>
+                    {ICON_OPTIONS.map((o) => (
+                      <option key={o.key} value={o.key}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {editing.icon && (
+                    <div className="mt-2 flex h-10 w-10 items-center justify-center rounded-md border border-border bg-card">
+                      <CategoryIcon name={editing.icon} className="h-5 w-5 text-gold" />
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
