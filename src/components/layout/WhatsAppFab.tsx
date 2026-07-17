@@ -5,7 +5,7 @@ import { whatsappLink } from "@/lib/format";
 
 export function WhatsAppFab() {
   const { data: settings } = useQuery(settingsQuery);
-  const number = (settings?.whatsapp_number as string) ?? "5588981907468";
+  const number = (settings?.whatsapp_number as string) ?? "5588981907458";
   return (
     <a
       href={whatsappLink(number, "Olá! Vim pelo site da FM IMPORTS 👑")}
