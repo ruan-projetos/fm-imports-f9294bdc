@@ -415,15 +415,9 @@ function SectionDialog({
   saving: boolean;
 }) {
   const [state, setState] = useState<Partial<HomeSection> | null>(editing);
-  // reset local state whenever editing changes
-  const editingId = editing?.id ?? null;
-  const currentId = state?.id ?? null;
-  if (editing && editingId !== currentId) {
+  useEffect(() => {
     setState(editing);
-  }
-  if (!editing && state) {
-    setState(null);
-  }
+  }, [editing]);
 
   const categoriesQ = useQuery({
     queryKey: ["admin", "categories_lite"],
