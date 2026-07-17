@@ -241,6 +241,141 @@ export type Database = {
           },
         ]
       }
+      home_section_products: {
+        Row: {
+          created_at: string
+          product_id: string
+          section_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          product_id: string
+          section_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          product_id?: string
+          section_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_section_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_section_products_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "home_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_sections: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          item_limit: number
+          key: string
+          sort_order: number
+          source: string
+          source_ref: string | null
+          subtitle: string | null
+          title: string
+          type: string
+          updated_at: string
+          view_all_href: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          item_limit?: number
+          key: string
+          sort_order?: number
+          source?: string
+          source_ref?: string | null
+          subtitle?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+          view_all_href?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          item_limit?: number
+          key?: string
+          sort_order?: number
+          source?: string
+          source_ref?: string | null
+          subtitle?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          view_all_href?: string | null
+        }
+        Relationships: []
+      }
+      home_settings: {
+        Row: {
+          coupon_active: boolean
+          coupon_code: string | null
+          coupon_color: string | null
+          coupon_text: string | null
+          coupon_title: string | null
+          created_at: string
+          hero_cta_href: string | null
+          hero_cta_label: string | null
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          coupon_active?: boolean
+          coupon_code?: string | null
+          coupon_color?: string | null
+          coupon_text?: string | null
+          coupon_title?: string | null
+          created_at?: string
+          hero_cta_href?: string | null
+          hero_cta_label?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          coupon_active?: boolean
+          coupon_code?: string | null
+          coupon_color?: string | null
+          coupon_text?: string | null
+          coupon_title?: string | null
+          created_at?: string
+          hero_cta_href?: string | null
+          hero_cta_label?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
