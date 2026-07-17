@@ -258,3 +258,79 @@ export function productDetailQuery(slug: string) {
     },
   });
 }
+
+export const homeSettingsQuery = queryOptions({
+  queryKey: ["home_settings"],
+  queryFn: async (): Promise<HomeSettings | null> => {
+    const { data, error } = await supabase
+      .from("home_settings")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return (data as HomeSettings) ?? null;
+  },
+});
+
+export const homeSectionsQuery = queryOptions({
+  queryKey: ["home_sections"],
+  queryFn: async (): Promise<HomeSection[]> => {
+    const { data, error } = await supabase
+      .from("home_sections")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order");
+    if (error) throw error;
+    return (data ?? []) as HomeSection[];
+  },
+});
+
+export function homeSectionProductsQuery(section: HomeSection) {
+  return queryOptions({
+    queryKey: ["home_section_products", section.id, section.source, section.source_ref, section.item_limit],
+    queryFn: async (): Promise<ProductWithImage[]> => {
+      const lim = section.item_limit || 8;
+
+      if (section.source === "manual") {
+        const { data, error } = await supabase
+          .from("home_section_products")
+          .select(`sort_order, product:products(${productSelect})`)
+          .eq("section_id", section.id)
+          .order("sort_order");
+        if (error) throw error;
+        return (data ?? [])
+          .map((r: any) => r.product)
+          .filter(Boolean)
+          .map(normalizeProduct)
+          .slice(0, lim);
+      }
+
+      let q = supabase.from("products").select(productSelect).eq("active", true);
+
+      switch (section.source) {
+        case "featured":
+          q = q.eq("is_featured", true);
+          break;
+        case "newest":
+          q = q.eq("is_new", true).order("created_at", { ascending: false });
+          break;
+        case "bestsellers":
+          q = q.eq("is_bestseller", true).order("sales_count", { ascending: false });
+          break;
+        case "promotions":
+          q = q.not("sale_price", "is", null);
+          break;
+        case "category":
+          if (section.source_ref) q = q.eq("category_id", section.source_ref);
+          break;
+        case "brand":
+          if (section.source_ref) q = q.eq("brand_id", section.source_ref);
+          break;
+      }
+
+      const { data, error } = await q.limit(lim);
+      if (error) throw error;
+      return (data ?? []).map(normalizeProduct);
+    },
+  });
+}
