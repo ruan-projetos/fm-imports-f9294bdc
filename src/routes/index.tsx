@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { MapPin, Instagram, MessageCircle } from "lucide-react";
 import {
   bannersQuery,
   categoriesQuery,
@@ -12,6 +13,8 @@ import {
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { CategoryStrip } from "@/components/home/CategoryStrip";
 import { ProductRow } from "@/components/product/ProductRow";
+import { STORE_WHATSAPP, STORE_INSTAGRAM, STORE_LOCATION_URL } from "@/lib/whatsapp";
+import { whatsappLink } from "@/lib/format";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
