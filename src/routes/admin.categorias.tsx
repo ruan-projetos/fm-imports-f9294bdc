@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { slugify } from "@/lib/slug";
+import { CategoryIcon, ICON_OPTIONS } from "@/lib/category-icons";
 
 export const Route = createFileRoute("/admin/categorias")({ component: CategoriesPage });
 
