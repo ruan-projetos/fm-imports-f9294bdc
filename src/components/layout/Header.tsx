@@ -36,7 +36,7 @@ export function Header() {
           aria-label="FM IMPORTS"
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         >
-          <img src={logo} alt="FM IMPORTS" className="h-14 w-auto object-contain md:h-16" />
+          <img src={logo} alt="FM IMPORTS" className="h-16 w-auto object-contain md:h-20" />
         </Link>
 
         <div className="ml-auto flex items-center gap-1">
