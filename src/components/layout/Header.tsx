@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Search, ShoppingBag, User, Menu } from "lucide-react";
 import { useCart, cartCount } from "@/store/cart";
-import logo from "@/assets/fm-imports-logo.jpg";
+import logoAsset from "@/assets/fm-imports-logo.jpg.asset.json";
 
 export function Header() {
   const count = useCart((s) => cartCount(s.items));
@@ -36,7 +36,7 @@ export function Header() {
           aria-label="FM IMPORTS"
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         >
-          <img src={logo} alt="FM IMPORTS" className="h-16 w-auto object-contain md:h-20" />
+          <img src={logoAsset.url} alt="FM IMPORTS" className="h-20 w-auto object-contain md:h-24" />
         </Link>
 
         <div className="ml-auto flex items-center gap-1">
