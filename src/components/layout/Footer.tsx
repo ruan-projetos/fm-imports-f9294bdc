@@ -2,7 +2,7 @@ import { Instagram, MessageCircle, MapPin } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { whatsappLink } from "@/lib/format";
 import { STORE_WHATSAPP, STORE_INSTAGRAM, STORE_LOCATION_URL } from "@/lib/whatsapp";
-import logo from "@/assets/fm-imports-logo.jpg";
+import logoAsset from "@/assets/fm-imports-logo.jpg.asset.json";
 
 export function Footer() {
   return (
@@ -11,7 +11,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-4">
           <div>
             <img
-              src={logo}
+              src={logoAsset.url}
               alt="FM IMPORTS"
               className="h-14 w-auto object-contain"
               loading="lazy"
