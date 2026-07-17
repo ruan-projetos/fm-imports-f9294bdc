@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { ComponentType, SVGProps } from "react";
 import {
   Shirt,
   Watch,
@@ -13,7 +13,7 @@ import {
   Star,
 } from "lucide-react";
 
-type IconComponent = (props: SVGProps<SVGSVGElement> & { size?: number }) => JSX.Element;
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 const stroke = {
   fill: "none",
