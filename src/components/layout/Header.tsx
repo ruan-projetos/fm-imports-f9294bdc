@@ -1,27 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { Search, ShoppingBag, User, Menu } from "lucide-react";
 import { useCart, cartCount } from "@/store/cart";
+import logo from "@/assets/fm-imports-logo.jpg";
 
 export function Header() {
   const count = useCart((s) => cartCount(s.items));
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 md:px-6">
+      <div className="relative mx-auto flex h-20 max-w-7xl items-center gap-4 px-4 md:px-6">
         <button className="md:hidden -ml-2 p-2" aria-label="Menu">
           <Menu className="h-5 w-5" />
         </button>
 
-        <Link to="/" className="flex items-center gap-2">
-          <span className="font-display text-xl font-bold tracking-widest text-gradient-silver">
-            FM
-          </span>
-          <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-gold">
-            Imports
-          </span>
-        </Link>
-
-        <nav className="hide-on-mobile ml-8 flex items-center gap-6 text-sm">
+        <nav className="hide-on-mobile flex items-center gap-6 text-sm">
           <Link to="/produtos" className="text-muted-foreground transition-colors hover:text-foreground">
             Novidades
           </Link>
@@ -38,6 +30,14 @@ export function Header() {
             Relógios
           </Link>
         </nav>
+
+        <Link
+          to="/"
+          aria-label="FM IMPORTS"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        >
+          <img src={logo} alt="FM IMPORTS" className="h-14 w-auto object-contain md:h-16" />
+        </Link>
 
         <div className="ml-auto flex items-center gap-1">
           <Link to="/produtos" className="p-2 text-muted-foreground hover:text-foreground" aria-label="Buscar">
@@ -59,3 +59,4 @@ export function Header() {
     </header>
   );
 }
+
