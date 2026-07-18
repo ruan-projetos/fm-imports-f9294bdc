@@ -1,8 +1,9 @@
-import { Instagram, MessageCircle, MapPin } from "lucide-react";
+import { Instagram, MapPin } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { whatsappLink } from "@/lib/format";
 import { STORE_WHATSAPP, STORE_INSTAGRAM, STORE_LOCATION_URL } from "@/lib/whatsapp";
 import logoAsset from "@/assets/fm-imports-logo.jpg.asset.json";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 export function Footer() {
   return (
@@ -50,14 +51,14 @@ export function Footer() {
               Contato
             </h4>
             <div className="mt-4 flex gap-3">
-              <a
+                <a
                 href={whatsappLink(STORE_WHATSAPP, "Olá! Vim pelo site 👑")}
                 target="_blank"
                 rel="noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors hover:border-gold hover:text-gold"
                 aria-label="WhatsApp"
               >
-                <MessageCircle className="h-4 w-4" />
+                <WhatsAppIcon className="h-4 w-4" />
               </a>
               <a
                 href={`https://instagram.com/${STORE_INSTAGRAM}`}
