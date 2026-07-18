@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Instagram, MessageCircle } from "lucide-react";
+import { MapPin, Instagram } from "lucide-react";
 import {
   bannersQuery,
   categoriesQuery,
@@ -12,6 +12,7 @@ import { CategoryStrip } from "@/components/home/CategoryStrip";
 import { HomeSectionRenderer } from "@/components/home/HomeSectionRenderer";
 import { STORE_WHATSAPP, STORE_INSTAGRAM, STORE_LOCATION_URL } from "@/lib/whatsapp";
 import { whatsappLink } from "@/lib/format";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -110,7 +111,7 @@ function HomePage() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium hover:border-gold hover:text-gold"
                 >
-                  <MessageCircle className="h-4 w-4" /> WhatsApp
+                  <WhatsAppIcon className="h-4 w-4" /> WhatsApp
                 </a>
                 <a
                   href={`https://instagram.com/${STORE_INSTAGRAM}`}
