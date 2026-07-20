@@ -53,6 +53,8 @@ function formatAddress(o: OrderLike) {
 function paymentLabel(pm?: string | null) {
   if (pm === "pix") return "PIX";
   if (pm === "on_delivery") return "Pagar na entrega (Dinheiro, PIX ou Cartão)";
+  if (pm === "mercado_pago_card") return "Cartão (Mercado Pago)";
+  if (pm === "mercado_pago_pix") return "PIX (Mercado Pago)";
   return pm ?? "—";
 }
 
