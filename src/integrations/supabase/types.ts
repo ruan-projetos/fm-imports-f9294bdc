@@ -464,18 +464,25 @@ export type Database = {
       orders: {
         Row: {
           address_snapshot: Json | null
+          card_brand: string | null
+          card_last_four: string | null
           coupon_code: string | null
           created_at: string
+          customer_document: string | null
           customer_phone: string | null
           customer_snapshot: Json | null
           delivery_address: Json | null
           delivery_type: string
           discount: number
           id: string
+          installments: number | null
           mp_payment_id: string | null
           mp_preference_id: string | null
+          mp_status: string | null
+          mp_status_detail: string | null
           notes: string | null
           order_number: string
+          paid_at: string | null
           payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           shipping: number
@@ -487,18 +494,25 @@ export type Database = {
         }
         Insert: {
           address_snapshot?: Json | null
+          card_brand?: string | null
+          card_last_four?: string | null
           coupon_code?: string | null
           created_at?: string
+          customer_document?: string | null
           customer_phone?: string | null
           customer_snapshot?: Json | null
           delivery_address?: Json | null
           delivery_type?: string
           discount?: number
           id?: string
+          installments?: number | null
           mp_payment_id?: string | null
           mp_preference_id?: string | null
+          mp_status?: string | null
+          mp_status_detail?: string | null
           notes?: string | null
           order_number?: string
+          paid_at?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           shipping?: number
@@ -510,18 +524,25 @@ export type Database = {
         }
         Update: {
           address_snapshot?: Json | null
+          card_brand?: string | null
+          card_last_four?: string | null
           coupon_code?: string | null
           created_at?: string
+          customer_document?: string | null
           customer_phone?: string | null
           customer_snapshot?: Json | null
           delivery_address?: Json | null
           delivery_type?: string
           discount?: number
           id?: string
+          installments?: number | null
           mp_payment_id?: string | null
           mp_preference_id?: string | null
+          mp_status?: string | null
+          mp_status_detail?: string | null
           notes?: string | null
           order_number?: string
+          paid_at?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           shipping?: number
@@ -851,6 +872,22 @@ export type Database = {
         Returns: {
           id: string
           order_number: string
+        }[]
+      }
+      create_order_secure: {
+        Args: {
+          p_customer: Json
+          p_customer_document?: string
+          p_delivery_address: Json
+          p_delivery_type: string
+          p_items: Json
+          p_notes?: string
+          p_payment_method: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: {
+          id: string
+          order_number: string
+          total: number
         }[]
       }
       has_role: {
