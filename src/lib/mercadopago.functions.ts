@@ -68,17 +68,17 @@ export const createMpCardPayment = createServerFn({ method: "POST" })
     const { data: orderRows, error: orderErr } = await context.supabase.rpc(
       "create_order_secure",
       {
-        p_items: data.items,
+        p_items: data.items as unknown as never,
         p_customer: {
           name: data.customer.name,
           phone: data.customer.phone,
           email: data.customer.email,
-        },
+        } as unknown as never,
         p_delivery_type: data.delivery_type,
-        p_delivery_address: data.delivery_address,
+        p_delivery_address: data.delivery_address as unknown as never,
         p_payment_method: "mercado_pago_card",
         p_customer_document: cpfDigits,
-        p_notes: data.notes ?? null,
+        p_notes: data.notes ?? undefined,
       },
     );
     if (orderErr) throw new Error(orderErr.message);

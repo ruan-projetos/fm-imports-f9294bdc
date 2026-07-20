@@ -81,7 +81,18 @@ export const Route = createFileRoute("/api/public/mp-webhook")({
         const rejected = p.status === "rejected" || p.status === "cancelled";
         const refunded = p.status === "refunded" || p.status === "charged_back";
 
-        const patch: Record<string, unknown> = {
+        type OrderUpdate = {
+          mp_payment_id: string;
+          mp_status: string;
+          mp_status_detail: string | null;
+          installments: number | null;
+          card_brand: string | null;
+          card_last_four: string | null;
+          payment_status: "approved" | "refunded" | "rejected" | "pending";
+          status?: "payment_confirmed" | "cancelled" | "refunded";
+          paid_at?: string;
+        };
+        const patch: OrderUpdate = {
           mp_payment_id: String(p.id),
           mp_status: p.status,
           mp_status_detail: p.status_detail ?? null,
