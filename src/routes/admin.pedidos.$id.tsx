@@ -231,6 +231,27 @@ function OrderDetail() {
                 <StatusBadge status={o.payment_status} />
               </p>
             )}
+            {o?.mp_payment_id && (
+              <div className="mt-3 space-y-1 border-t border-border/40 pt-3 text-xs text-muted-foreground">
+                <p><span className="font-medium text-foreground">ID MP:</span> {o.mp_payment_id}</p>
+                {o.card_brand && (
+                  <p>
+                    <span className="font-medium text-foreground">Cartão:</span>{" "}
+                    {o.card_brand}
+                    {o.card_last_four ? ` •••• ${o.card_last_four}` : ""}
+                  </p>
+                )}
+                {o.installments && (
+                  <p><span className="font-medium text-foreground">Parcelas:</span> {o.installments}x</p>
+                )}
+                {o.mp_status_detail && (
+                  <p><span className="font-medium text-foreground">Detalhe:</span> {o.mp_status_detail}</p>
+                )}
+                {o.paid_at && (
+                  <p><span className="font-medium text-foreground">Aprovado em:</span> {new Date(o.paid_at).toLocaleString("pt-BR")}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -241,6 +262,8 @@ function OrderDetail() {
 function paymentMethodLabel(pm?: string | null) {
   if (pm === "pix") return "PIX (via WhatsApp)";
   if (pm === "on_delivery") return "Pagar na entrega";
+  if (pm === "mercado_pago_card") return "Cartão (Mercado Pago)";
+  if (pm === "mercado_pago_pix") return "PIX (Mercado Pago)";
   return pm ?? "—";
 }
 

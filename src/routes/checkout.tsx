@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Loader2, Truck, Store, QrCode, Wallet, ShieldCheck } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Truck, Store, QrCode, Wallet, ShieldCheck, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart, cartTotal } from "@/store/cart";
 import { formatBRL } from "@/lib/format";
 import { buildOrderMessage, openWhatsApp, STORE_WHATSAPP } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
+import { getMpPublicKey, createMpCardPayment } from "@/lib/mercadopago.functions";
 
 export const Route = createFileRoute("/checkout")({
   ssr: false,
@@ -14,7 +16,10 @@ export const Route = createFileRoute("/checkout")({
 });
 
 type DeliveryType = "delivery" | "pickup";
-type PaymentMethod = "pix" | "on_delivery";
+type PaymentMethod = "pix" | "on_delivery" | "mp_card";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare global { interface Window { MercadoPago?: any } }
 
 function CheckoutPage() {
   const navigate = useNavigate();
@@ -27,6 +32,7 @@ function CheckoutPage() {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [city, setCity] = useState("Quixeré");
   const [neighborhood, setNeighborhood] = useState("");
   const [street, setStreet] = useState("");
@@ -34,8 +40,10 @@ function CheckoutPage() {
   const [complement, setComplement] = useState("");
   const [reference, setReference] = useState("");
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("delivery");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mp_card");
   const [notes, setNotes] = useState("");
+
+  const createCardPayment = useServerFn(createMpCardPayment);
 
   useEffect(() => {
     (async () => {
@@ -44,7 +52,6 @@ function CheckoutPage() {
         navigate({ to: "/auth", search: { redirect: "/checkout" } });
         return;
       }
-      // Prefill from profile if available
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name, phone")
@@ -52,6 +59,7 @@ function CheckoutPage() {
         .maybeSingle();
       if (profile?.full_name) setName(profile.full_name);
       if (profile?.phone) setPhone(profile.phone);
+      if (data.user.email) setEmail(data.user.email);
       setCheckingAuth(false);
     })();
   }, [navigate]);
@@ -62,62 +70,51 @@ function CheckoutPage() {
     }
   }, [checkingAuth, items.length, navigate]);
 
-  async function submit(e: React.FormEvent) {
+  const address = { city, neighborhood, street, number, complement, reference };
+  const rpcItems = items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity }));
+  const customerPayload = { name, phone };
+
+  function validateBasics(): string | null {
+    if (!name || !phone) return "Preencha nome e WhatsApp";
+    if (paymentMethod === "mp_card" && !email) return "Informe seu email para pagamento com cartão";
+    if (deliveryType === "delivery" && (!street || !number || !neighborhood))
+      return "Preencha o endereço de entrega";
+    return null;
+  }
+
+  async function handleLegacySubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting) return;
-    if (deliveryType === "delivery" && (!street || !number || !neighborhood)) {
-      toast.error("Preencha o endereço de entrega");
-      return;
-    }
+    const err = validateBasics();
+    if (err) return toast.error(err);
     setSubmitting(true);
     try {
-      const rpcItems = items.map((i) => ({
+      const legacyItems = items.map((i) => ({
         variant_id: i.variantId,
         quantity: i.quantity,
         unit_price: i.unitPrice,
-        snapshot: {
-          name: i.name,
-          image: i.image,
-          color: i.color,
-          size: i.size,
-          slug: i.slug,
-        },
+        snapshot: { name: i.name, image: i.image, color: i.color, size: i.size, slug: i.slug },
       }));
-
-      const customer = { name, phone };
-      const address = {
-        city,
-        neighborhood,
-        street,
-        number,
-        complement,
-        reference,
-      };
-
       const { data, error } = await supabase.rpc("create_order", {
-        p_items: rpcItems,
-        p_customer: customer,
+        p_items: legacyItems,
+        p_customer: customerPayload,
         p_delivery_type: deliveryType,
         p_delivery_address: deliveryType === "delivery" ? address : { city, pickup: true },
-        p_payment_method: paymentMethod,
+        p_payment_method: paymentMethod === "pix" ? "pix" : "on_delivery",
         p_notes: notes || "",
       });
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
       if (!row?.id) throw new Error("Não foi possível criar o pedido");
-
-      const orderNumber = row.order_number as string;
       const orderId = row.id as string;
-
+      const orderNumber = row.order_number as string;
       toast.success("Pedido criado com sucesso.");
-
-      // Open WhatsApp with pre-filled message
       const msg = buildOrderMessage(
         {
           order_number: orderNumber,
           total,
           delivery_type: deliveryType,
-          payment_method: paymentMethod,
+          payment_method: paymentMethod === "pix" ? "pix" : "on_delivery",
           customer_snapshot: { name, phone },
           delivery_address: address,
         },
@@ -128,12 +125,10 @@ function CheckoutPage() {
         })),
       );
       openWhatsApp(STORE_WHATSAPP, msg);
-
       clear();
       navigate({ to: "/pedido/$id", params: { id: orderId } });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Falha ao criar pedido";
-      toast.error(msg);
+      toast.error(err instanceof Error ? err.message : "Falha ao criar pedido");
     } finally {
       setSubmitting(false);
     }
@@ -161,9 +156,8 @@ function CheckoutPage() {
         </p>
       </div>
 
-      <form onSubmit={submit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+      <form onSubmit={handleLegacySubmit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">
-          {/* Dados */}
           <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Seus dados
@@ -171,10 +165,17 @@ function CheckoutPage() {
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Nome completo" required value={name} onChange={setName} />
               <Field label="WhatsApp" required value={phone} onChange={setPhone} placeholder="(88) 9 9999-9999" />
+              <Field
+                label={paymentMethod === "mp_card" ? "Email (obrigatório p/ cartão)" : "Email"}
+                required={paymentMethod === "mp_card"}
+                value={email}
+                onChange={setEmail}
+                type="email"
+                className="sm:col-span-2"
+              />
             </div>
           </section>
 
-          {/* Entrega */}
           <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Forma de entrega
@@ -208,16 +209,22 @@ function CheckoutPage() {
             )}
           </section>
 
-          {/* Pagamento */}
           <section className="rounded-2xl border border-border bg-card p-5 md:p-6">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Forma de pagamento
             </h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <OptionCard
+                icon={<CreditCard className="h-5 w-5" />}
+                title="Cartão (Mercado Pago)"
+                description="Pagamento seguro com aprovação imediata. Parcele em até 12x."
+                selected={paymentMethod === "mp_card"}
+                onClick={() => setPaymentMethod("mp_card")}
+              />
               <OptionCard
                 icon={<QrCode className="h-5 w-5" />}
-                title="PIX"
-                description="Após confirmar a disponibilidade, enviamos a chave PIX pelo WhatsApp."
+                title="PIX (via WhatsApp)"
+                description="Confirmamos a disponibilidade e enviamos a chave PIX pelo WhatsApp."
                 selected={paymentMethod === "pix"}
                 onClick={() => setPaymentMethod("pix")}
               />
@@ -242,10 +249,46 @@ function CheckoutPage() {
                 placeholder="Ex: Deixar com o porteiro"
               />
             </div>
+
+            {paymentMethod === "mp_card" && total > 0 && (
+              <MercadoPagoBrick
+                amount={total}
+                onSubmit={async (mpForm) => {
+                  const err = validateBasics();
+                  if (err) { toast.error(err); throw new Error(err); }
+                  setSubmitting(true);
+                  try {
+                    const res = await createCardPayment({
+                      data: {
+                        items: rpcItems,
+                        customer: { name, phone, email },
+                        delivery_type: deliveryType,
+                        delivery_address: deliveryType === "delivery" ? address : { city, pickup: true },
+                        notes: notes || undefined,
+                        mp: mpForm,
+                      },
+                    });
+                    if (res.status === "approved") {
+                      toast.success("Pagamento aprovado!");
+                    } else if (res.status === "rejected" || res.status === "cancelled") {
+                      toast.error("Pagamento recusado: " + (res.statusDetail ?? res.status));
+                    } else {
+                      toast.info("Pagamento em análise. Você será notificado.");
+                    }
+                    clear();
+                    navigate({ to: "/pedido/$id", params: { id: res.orderId } });
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Falha no pagamento");
+                    throw e;
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+              />
+            )}
           </section>
         </div>
 
-        {/* Resumo */}
         <aside className="h-fit rounded-2xl border border-border bg-card p-6 lg:sticky lg:top-24">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             Resumo do pedido
@@ -265,16 +308,25 @@ function CheckoutPage() {
             <span className="text-sm font-medium">Total</span>
             <span className="font-display text-2xl font-bold">{formatBRL(total)}</span>
           </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full gradient-gold py-3.5 text-sm font-semibold text-black disabled:opacity-60"
-          >
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {submitting ? "Enviando pedido…" : "Finalizar pedido"}
-          </button>
+
+          {paymentMethod === "mp_card" ? (
+            <p className="mt-6 rounded-xl border border-border bg-background/60 px-4 py-3 text-center text-xs text-muted-foreground">
+              Preencha os dados do cartão acima e finalize o pagamento pelo Mercado Pago.
+            </p>
+          ) : (
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full gradient-gold py-3.5 text-sm font-semibold text-black disabled:opacity-60"
+            >
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {submitting ? "Enviando pedido…" : "Finalizar pedido"}
+            </button>
+          )}
           <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            Você será redirecionado para o WhatsApp da loja em seguida.
+            {paymentMethod === "mp_card"
+              ? "Ambiente seguro Mercado Pago · SSL 256 bits"
+              : "Você será redirecionado para o WhatsApp da loja em seguida."}
           </p>
           <Link to="/carrinho" className="mt-4 block text-center text-xs text-muted-foreground hover:text-foreground">
             ← Voltar para a sacola
@@ -285,13 +337,99 @@ function CheckoutPage() {
   );
 }
 
+type MpFormData = {
+  token: string;
+  payment_method_id: string;
+  issuer_id?: string | number;
+  installments: number;
+  payer: { email: string; identification: { type: string; number: string } };
+};
+
+function MercadoPagoBrick({
+  amount,
+  onSubmit,
+}: {
+  amount: number;
+  onSubmit: (data: MpFormData) => Promise<void>;
+}) {
+  const containerId = "mp-card-brick-container";
+  const [publicKey, setPublicKey] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const brickRef = useRef<any>(null);
+  const getKey = useServerFn(getMpPublicKey);
+
+  useEffect(() => {
+    getKey().then((r) => setPublicKey(r.publicKey)).catch(() => toast.error("MP não configurado"));
+  }, [getKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!publicKey) return;
+
+    async function waitForSdk() {
+      for (let i = 0; i < 40; i++) {
+        if (typeof window !== "undefined" && window.MercadoPago) return true;
+        await new Promise((r) => setTimeout(r, 150));
+      }
+      return false;
+    }
+
+    (async () => {
+      const ok = await waitForSdk();
+      if (!ok || cancelled) {
+        toast.error("Não foi possível carregar o Mercado Pago");
+        return;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mp = new (window as any).MercadoPago(publicKey, { locale: "pt-BR" });
+      const bricks = mp.bricks();
+      if (brickRef.current) {
+        try { brickRef.current.unmount(); } catch { /* noop */ }
+        brickRef.current = null;
+      }
+      brickRef.current = await bricks.create("cardPayment", containerId, {
+        initialization: { amount },
+        customization: {
+          visual: { style: { theme: "dark" } },
+          paymentMethods: { maxInstallments: 12 },
+        },
+        callbacks: {
+          onReady: () => setReady(true),
+          onSubmit: (form: { formData: MpFormData }) =>
+            new Promise<void>((resolve, reject) => {
+              onSubmit(form.formData).then(resolve).catch(reject);
+            }),
+          onError: (err: unknown) => {
+            console.error("[MP Brick]", err);
+          },
+        },
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+      if (brickRef.current) {
+        try { brickRef.current.unmount(); } catch { /* noop */ }
+        brickRef.current = null;
+      }
+    };
+  }, [publicKey, amount, onSubmit]);
+
+  return (
+    <div className="mt-6 rounded-xl border border-border/60 bg-background p-4">
+      {!ready && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin text-gold" /> Carregando pagamento seguro…
+        </div>
+      )}
+      <div id={containerId} />
+    </div>
+  );
+}
+
 function Field({
-  label,
-  value,
-  onChange,
-  required,
-  placeholder,
-  className,
+  label, value, onChange, required, placeholder, className, type = "text",
 }: {
   label: string;
   value: string;
@@ -299,6 +437,7 @@ function Field({
   required?: boolean;
   placeholder?: string;
   className?: string;
+  type?: string;
 }) {
   return (
     <div className={className}>
@@ -306,6 +445,7 @@ function Field({
         {label}
       </label>
       <input
+        type={type}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -317,11 +457,7 @@ function Field({
 }
 
 function OptionCard({
-  icon,
-  title,
-  description,
-  selected,
-  onClick,
+  icon, title, description, selected, onClick,
 }: {
   icon: React.ReactNode;
   title: string;
