@@ -79,7 +79,13 @@ function OrderConfirmationPage() {
   }
 
   const isPickup = o.delivery_type === "pickup";
-  const paymentLabel = o.payment_method === "pix" ? "PIX (via WhatsApp)" : o.payment_method === "on_delivery" ? "Pagar na entrega" : (o.payment_method ?? "—");
+  const paymentLabels: Record<string, string> = {
+    pix: "PIX (via WhatsApp)",
+    on_delivery: "Pagar na entrega",
+    mercado_pago_card: "Cartão (Mercado Pago)",
+    mercado_pago_pix: "PIX (Mercado Pago)",
+  };
+  const paymentLabel = o.payment_method ? (paymentLabels[o.payment_method] ?? o.payment_method) : "—";
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 pb-28 md:px-6 md:py-14">
