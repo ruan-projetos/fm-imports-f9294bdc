@@ -32,6 +32,7 @@ import { Route as AdminAvaliacoesRouteImport } from './routes/admin.avaliacoes'
 import { Route as AdminProdutosIndexRouteImport } from './routes/admin.produtos.index'
 import { Route as AdminPedidosIndexRouteImport } from './routes/admin.pedidos.index'
 import { Route as AdminClientesIndexRouteImport } from './routes/admin.clientes.index'
+import { Route as ApiPublicMpWebhookRouteImport } from './routes/api/public/mp-webhook'
 import { Route as AdminProdutosNovoRouteImport } from './routes/admin.produtos.novo'
 import { Route as AdminProdutosIdRouteImport } from './routes/admin.produtos.$id'
 import { Route as AdminPedidosIdRouteImport } from './routes/admin.pedidos.$id'
@@ -152,6 +153,11 @@ const AdminClientesIndexRoute = AdminClientesIndexRouteImport.update({
   path: '/clientes/',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
+  id: '/api/public/mp-webhook',
+  path: '/api/public/mp-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminProdutosNovoRoute = AdminProdutosNovoRouteImport.update({
   id: '/produtos/novo',
   path: '/produtos/novo',
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/admin/pedidos/$id': typeof AdminPedidosIdRoute
   '/admin/produtos/$id': typeof AdminProdutosIdRoute
   '/admin/produtos/novo': typeof AdminProdutosNovoRoute
+  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/admin/clientes/': typeof AdminClientesIndexRoute
   '/admin/pedidos/': typeof AdminPedidosIndexRoute
   '/admin/produtos/': typeof AdminProdutosIndexRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/admin/pedidos/$id': typeof AdminPedidosIdRoute
   '/admin/produtos/$id': typeof AdminProdutosIdRoute
   '/admin/produtos/novo': typeof AdminProdutosNovoRoute
+  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/admin/clientes': typeof AdminClientesIndexRoute
   '/admin/pedidos': typeof AdminPedidosIndexRoute
   '/admin/produtos': typeof AdminProdutosIndexRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/admin/pedidos/$id': typeof AdminPedidosIdRoute
   '/admin/produtos/$id': typeof AdminProdutosIdRoute
   '/admin/produtos/novo': typeof AdminProdutosNovoRoute
+  '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/admin/clientes/': typeof AdminClientesIndexRoute
   '/admin/pedidos/': typeof AdminPedidosIndexRoute
   '/admin/produtos/': typeof AdminProdutosIndexRoute
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos/$id'
     | '/admin/produtos/$id'
     | '/admin/produtos/novo'
+    | '/api/public/mp-webhook'
     | '/admin/clientes/'
     | '/admin/pedidos/'
     | '/admin/produtos/'
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos/$id'
     | '/admin/produtos/$id'
     | '/admin/produtos/novo'
+    | '/api/public/mp-webhook'
     | '/admin/clientes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/pedidos/$id'
     | '/admin/produtos/$id'
     | '/admin/produtos/novo'
+    | '/api/public/mp-webhook'
     | '/admin/clientes/'
     | '/admin/pedidos/'
     | '/admin/produtos/'
@@ -360,6 +372,7 @@ export interface RootRouteChildren {
   PedidoIdRoute: typeof PedidoIdRoute
   ProdutosSlugRoute: typeof ProdutosSlugRoute
   ProdutosIndexRoute: typeof ProdutosIndexRoute
+  ApiPublicMpWebhookRoute: typeof ApiPublicMpWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -525,6 +538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/mp-webhook': {
+      id: '/api/public/mp-webhook'
+      path: '/api/public/mp-webhook'
+      fullPath: '/api/public/mp-webhook'
+      preLoaderRoute: typeof ApiPublicMpWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/produtos/novo': {
       id: '/admin/produtos/novo'
       path: '/produtos/novo'
@@ -617,17 +637,8 @@ const rootRouteChildren: RootRouteChildren = {
   PedidoIdRoute: PedidoIdRoute,
   ProdutosSlugRoute: ProdutosSlugRoute,
   ProdutosIndexRoute: ProdutosIndexRoute,
+  ApiPublicMpWebhookRoute: ApiPublicMpWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
